@@ -171,7 +171,10 @@ test('cluster: deadline while waiting for shared handler capacity never starts t
   }, { concurrency: 1, queueLimit: 8 });
   const first = pool.requestJSON('blocked', { hold: true }, { timeoutMs: 2000 });
   await started.promise;
-  await assert.rejects(pool.requestJSON('blocked', { hold: false }, { timeoutMs: 60 }), error => error.code === 10);
+  // The broker deadline and worker cancellation race. Worker failures travel
+  // as code 12; accept only the specific deadline reason, never arbitrary errors.
+  await assert.rejects(pool.requestJSON('blocked', { hold: false }, { timeoutMs: 60 }), error =>
+    error.code === 10 || (error.code === 12 && /^(Handler deadline exceeded|Deadline expired before local handler admission)/.test(error.message)));
   gate.resolve(); await first; await delay(30); assert.equal(calls, 1);
 });
 
