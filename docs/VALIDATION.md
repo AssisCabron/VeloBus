@@ -12,8 +12,10 @@ Executada localmente em 9 de setembro de 2026, macOS ARM64 / Apple M2.
 | Binário `release` local | Compilado |
 | Instalação do pacote npm em projeto separado, ESM e CommonJS | Passou |
 | Request/reply com o pacote instalado | Passou |
+| Instrumento de benchmark: histogramas, chegadas, limites e leitura de recursos | 15 testes passaram |
+| Benchmark curto de fumaça e execução curta dos sete cenários | Passaram |
 
-Total: **102 testes**, além do teste de instalação e do ensaio de sobrecarga.
+Total: **102 testes do produto + 15 do instrumento de benchmark**, além dos testes de instalação e ensaios de carga. As execuções curtas validam o instrumento, não são resultados de desempenho.
 
 Um teste de regressão reproduz um cliente que recebe a resposta e imediatamente repõe uma das 32 operações da conexão. A vaga e o identificador agora são liberados antes de tornar a resposta visível; a ordem anterior podia rejeitar esse cliente indevidamente e desconectar um worker do SDK sob carga. A saída permanece limitada. O teste falhou com a ordem antiga e passou com a correção.
 
@@ -29,6 +31,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 npm run build
 npm run test:package
 npm run load:rpc
+npm run test:benchmark
 ```
 
 O workflow GitHub Actions inclui Linux x64 e ARM64. O resultado de execução remota deve ser verificado no GitHub; os resultados acima são locais. Não houve publicação no npm, implantação externa, teste no Raspberry Pi ou avaliação de alta disponibilidade. As medições históricas de eventos v0.1 não representam desempenho RPC.

@@ -13,6 +13,8 @@
     "example": "node examples/quickstart.mjs",
     "example:http": "node examples/http-demo.mjs",
     "benchmark": "node scripts/benchmark.mjs",
+    "benchmark:rpc": "node scripts/rpc-benchmark.mjs",
+    "test:benchmark": "node --test scripts/benchmarks/*.test.mjs && node scripts/rpc-benchmark.mjs --smoke",
     "load:rpc": "node scripts/rpc-load.mjs",
     "pack:client": "node scripts/pack-client.mjs",
     "test:package": "node scripts/package-smoke.mjs"

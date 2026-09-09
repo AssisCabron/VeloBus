@@ -117,10 +117,14 @@ npm run build
 npm run test:package
 npm run pack:client
 npm run load:rpc
+npm run test:benchmark
+npm run benchmark:rpc -- --output docs/benchmarks/local-rpc.json
 ```
 
 Os scripts usam `work/` para temporários; `VELOBUS_WORK_DIR` permite outro diretório. O pacote instalável é gerado em `artifacts/`.
 
-Os benchmarks de eventos em [BENCHMARKS.md](docs/BENCHMARKS.md) não demonstram capacidade request/reply. Para RPC, medir latência de ponta a ponta, fila, rejeições, CPU e memória sob serviços lentos e falhas. Não há alegação de vantagem universal sobre outros intermediários.
+O [benchmark RPC](docs/RPC-BENCHMARKS.md) mede respostas completas, latências, rejeições e recursos com processos separados, aquecimento e repetições. O comando completo demora alguns minutos e usa o binário release. A checagem `test:benchmark` é curta e valida o instrumento, sem exigir uma meta de desempenho em CI. Os benchmarks de eventos em [BENCHMARKS.md](docs/BENCHMARKS.md) não demonstram capacidade request/reply. Não há alegação de vantagem universal sobre outros intermediários.
+
+As [novas propostas de features](docs/FEATURES.md) priorizam métricas por fase, cotas justas, encerramento gradual e integração tipada.
 
 Detalhes: [request/reply](docs/RPC-PROTOCOL.md), [eventos](docs/PROTOCOL.md), [arquitetura](docs/ARCHITECTURE.md), [roteiro](docs/ROADMAP.md), [cliente](packages/client/README.md).

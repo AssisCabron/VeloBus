@@ -2,6 +2,8 @@
 
 O foco é intermediar chamadas entre APIs e microsserviços com resposta aguardada e capacidade controlada. As etapas abaixo são propostas, não recursos disponíveis nem promessas de prazo ou desempenho. A v0.2 continua experimental, em um único nó, com RPC volátil e sem replay automático.
 
+Veja também o [backlog priorizado de features](FEATURES.md) e o [benchmark de request/reply](RPC-BENCHMARKS.md).
+
 ## 1. Validar proteção sob sobrecarga
 
 Demonstrar filas e concorrência limitadas por rota, limites globais e erro rápido sem capacidade. Exercitar serviços lentos, handlers com erro, múltiplos workers, chamadas simultâneas e consumidores de resposta lentos.
