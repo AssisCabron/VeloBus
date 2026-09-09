@@ -1,0 +1,84 @@
+{
+  "timestamp": "2026-09-09T19:03:16.645Z",
+  "status": "local-development-measurement",
+  "environment": {
+    "os": "darwin",
+    "release": "27.0.0",
+    "architecture": "arm64",
+    "cpu": "Apple M2",
+    "logicalCpus": 8,
+    "systemMemoryBytes": 8589934592,
+    "node": "v26.7.0",
+    "rust": "rustc 1.97.1 (8bab26f4f 2026-07-14) (Homebrew)",
+    "brokerBinary": "target/release/velobus",
+    "brokerBinaryBytes": 951424
+  },
+  "workload": {
+    "mode": "disk",
+    "messages": 100000,
+    "payloadBytes": 256,
+    "batchSize": 128,
+    "keyCount": 100,
+    "producers": 1,
+    "transport": "loopback TCP",
+    "consumers": "one per sequential read phase",
+    "tls": false,
+    "replication": false,
+    "warmup": false
+  },
+  "publish": {
+    "confirmedRecords": 100000,
+    "durable": true,
+    "elapsedMs": 2990.592541,
+    "recordsPerSecond": 33438.189465476906,
+    "ackBatchLatencyMs": {
+      "p50": 3.0088340000002063,
+      "p95": 4.935959000000366,
+      "p99": 9.217791999999918,
+      "max": 219.19666599999982
+    }
+  },
+  "all": {
+    "delivered": 100000,
+    "batches": 391,
+    "cursor": "100000",
+    "elapsedMs": 108.98754199999985,
+    "deliveriesPerSecond": 917536.0611399065,
+    "payloadBytes": 25600000
+  },
+  "latest": {
+    "delivered": 2500,
+    "batches": 25,
+    "cursor": "100000",
+    "elapsedMs": 7.6244580000002316,
+    "deliveriesPerSecond": 327892.15967875015,
+    "payloadBytes": 640000
+  },
+  "latestDeliveryReductionPercent": 97.5,
+  "observedBrokerRssPeakBytes": 52756480,
+  "rssSamplingIntervalMs": 50,
+  "stats": {
+    "coalescedRecords": 97500,
+    "connections": 1,
+    "fetchedRecords": 102500,
+    "lastSequence": "100000",
+    "maxRetainedBytes": 67108864,
+    "maxWalBytes": 134217728,
+    "mode": "disk",
+    "publishedRecords": 100000,
+    "records": 100000,
+    "retainedBytes": 54180000,
+    "uptimeSeconds": 3.331236042,
+    "version": "0.1.0",
+    "walBytes": 27907212,
+    "writePoisoned": false
+  },
+  "caveats": [
+    "Not a Raspberry Pi measurement or a comparison with another broker.",
+    "Node client and server share this machine; phases run sequentially over loopback.",
+    "ACK latency is measured per published batch, not per-message end-to-end processing latency.",
+    "RSS is a sampled maximum, not a guaranteed peak or configured process limit.",
+    "latest uses synthetic repeated keys; savings depend on application semantics and workload.",
+    "Disk mode syncs the local WAL; power-loss behavior depends on actual hardware and storage."
+  ]
+}

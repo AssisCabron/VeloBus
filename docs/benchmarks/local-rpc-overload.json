@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-09-09T19:22:03.853Z",
+  "purpose": "Short local verification of RPC overload protection, not a throughput benchmark",
+  "environment": {
+    "cpu": "Apple M2",
+    "os": "darwin",
+    "architecture": "arm64",
+    "node": "v26.7.0"
+  },
+  "workload": {
+    "requests": 64,
+    "callers": 2,
+    "replicas": 2,
+    "concurrencyPerReplica": 2,
+    "queueLimit": 8,
+    "handlerDelayMs": 50,
+    "deadlineMs": 2000,
+    "transport": "loopback TCP",
+    "binary": "explicit binary from VELOBUS_BIN"
+  },
+  "results": {
+    "succeeded": 12,
+    "overloaded": 52,
+    "unexpectedErrors": 0,
+    "observedPeakHandlers": 4,
+    "executed": 12,
+    "elapsedMs": 159.594625
+  },
+  "rpc": {
+    "accepted": 12,
+    "completed": 12,
+    "maxBytes": 16777216,
+    "maxCalls": 1024,
+    "queued": 0,
+    "rejected": 52,
+    "retainedBytes": 0,
+    "routes": [
+      {
+        "concurrency": 4,
+        "name": "users.get",
+        "queueLimit": 8,
+        "queued": 0,
+        "running": 0,
+        "workers": 2
+      }
+    ],
+    "running": 0,
+    "timedOut": 0
+  },
+  "notes": [
+    "Waiting calls are bounded; overload returns a structured error instead of forwarding to every service.",
+    "Exact admitted count depends on scheduling.",
+    "Caller and worker code run on the same Mac, not on a Raspberry Pi.",
+    "This test does not prove high availability or sustained capacity."
+  ]
+}

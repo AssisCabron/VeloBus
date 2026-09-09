@@ -1,0 +1,21 @@
+{
+  "name": "velobus-development",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "npm --prefix packages/client install",
+    "build": "cargo build --release && npm --prefix packages/client run build",
+    "dev": "cargo run -- --memory",
+    "start": "cargo run --release --",
+    "test": "cargo build && cargo test && npm --prefix packages/client test && npm run test:integration",
+    "test:integration": "node --test --test-concurrency=1 scripts/integration.test.mjs scripts/rpc-integration.test.mjs scripts/http-integration.test.mjs",
+    "example": "node examples/quickstart.mjs",
+    "example:http": "node examples/http-demo.mjs",
+    "benchmark": "node scripts/benchmark.mjs",
+    "load:rpc": "node scripts/rpc-load.mjs",
+    "pack:client": "node scripts/pack-client.mjs",
+    "test:package": "node scripts/package-smoke.mjs"
+  },
+  "engines": {"node": ">=20"}
+}

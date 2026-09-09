@@ -1,0 +1,10 @@
+/target/
+/data/
+/artifacts/
+/work/
+**/node_modules/
+**/dist/
+*.tgz
+.DS_Store
+.env
+*.log
