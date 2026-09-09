@@ -152,7 +152,9 @@ test('cluster: invalid endpoint/configuration fails before opening connections',
 });
 
 test('cluster: sustained replenishment at 32 operations per broker keeps workers registered', async t => {
-  const f = await fixture(t); const pool = await f.pool(); let executed = 0;
+  // Reserve the full transport budget for this test; heartbeat operations count
+  // against the same limit and are covered by the other lifecycle scenarios.
+  const f = await fixture(t); const pool = await f.pool({ healthIntervalMs: 60000 }); let executed = 0;
   const service = await pool.handleJSON('burst', body => { executed++; return body; }, { concurrency: 32, queueLimit: 128 });
   for (let batch = 0; batch < 5; batch++) {
     const results = await Promise.all(Array.from({ length: 64 }, (_, id) => pool.requestJSON('burst', { id, batch })));
