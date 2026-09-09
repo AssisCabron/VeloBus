@@ -125,6 +125,8 @@ Os scripts usam `work/` para temporários; `VELOBUS_WORK_DIR` permite outro dire
 
 O [benchmark RPC](docs/RPC-BENCHMARKS.md) mede respostas completas, latências, rejeições e recursos com processos separados, aquecimento e repetições. O comando completo demora alguns minutos e usa o binário release. A checagem `test:benchmark` é curta e valida o instrumento, sem exigir uma meta de desempenho em CI. Os benchmarks de eventos em [BENCHMARKS.md](docs/BENCHMARKS.md) não demonstram capacidade request/reply. Não há alegação de vantagem universal sobre outros intermediários.
 
+Referência local no Apple M2: com payload de 256 B e 32 chamadas simultâneas, a mediana de três execuções foi **48,3 mil respostas/s**, com **p99 mediano de 1,52 ms**. Cada execução teve 2 s de aquecimento e 10 s de admissão. O relatório inclui variação, rejeições, pausas do gerador e CPU/memória de cada processo. Esses números não foram medidos no Raspberry Pi.
+
 As [novas propostas de features](docs/FEATURES.md) priorizam métricas por fase, cotas justas, encerramento gradual e integração tipada.
 
 Detalhes: [request/reply](docs/RPC-PROTOCOL.md), [eventos](docs/PROTOCOL.md), [arquitetura](docs/ARCHITECTURE.md), [roteiro](docs/ROADMAP.md), [cliente](packages/client/README.md).

@@ -13,9 +13,11 @@ Executada localmente em 9 de setembro de 2026, macOS ARM64 / Apple M2.
 | Instalação do pacote npm em projeto separado, ESM e CommonJS | Passou |
 | Request/reply com o pacote instalado | Passou |
 | Instrumento de benchmark: histogramas, chegadas, limites e leitura de recursos | 15 testes passaram |
-| Benchmark curto de fumaça e execução curta dos sete cenários | Passaram |
+| Checagem curta do benchmark e execução curta dos sete cenários | Passaram |
 
 Total: **102 testes do produto + 15 do instrumento de benchmark**, além dos testes de instalação e ensaios de carga. As execuções curtas validam o instrumento, não são resultados de desempenho.
+
+O [benchmark RPC completo](RPC-BENCHMARKS.md) passou em 21 execuções no mesmo Mac: 3.678.019 respostas corretas e 112.100 rejeições explícitas de sobrecarga. As chamadas não enviadas pelo próprio gerador são registradas separadamente; não são rejeições do broker. O [CI da fonte medida](https://github.com/AssisCabron/VeloBus/actions/runs/34397665852) passou em Linux x64 e ARM64.
 
 Um teste de regressão reproduz um cliente que recebe a resposta e imediatamente repõe uma das 32 operações da conexão. A vaga e o identificador agora são liberados antes de tornar a resposta visível; a ordem anterior podia rejeitar esse cliente indevidamente e desconectar um worker do SDK sob carga. A saída permanece limitada. O teste falhou com a ordem antiga e passou com a correção.
 

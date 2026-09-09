@@ -1,0 +1,5644 @@
+{
+  "schemaVersion": 1,
+  "timestamp": "2026-09-09T19:52:58.340Z",
+  "purpose": "local RPC baseline; not a capacity certification",
+  "environment": {
+    "os": "darwin",
+    "release": "27.0.0",
+    "architecture": "arm64",
+    "cpu": "Apple M2",
+    "logicalCpus": 8,
+    "systemMemoryBytes": 8589934592,
+    "node": "v26.7.0",
+    "rust": "rustc 1.97.1 (8bab26f4f 2026-07-14) (Homebrew)",
+    "sourceCommit": "6b3a79282152672092ab982eaabfa2c57f27f7a6",
+    "workingTreeDirty": false,
+    "binaryLabel": "target/release/velobus",
+    "binaryBytes": 1197200,
+    "binarySha256": "3a128c8c642ed1d7253378005a746c63c1a8d4a510b995f22f07f3df751a0152"
+  },
+  "methodology": {
+    "durationMs": 10000,
+    "warmupMs": 2000,
+    "repetitions": 3,
+    "repeatOrder": "rotate scenario order by repetition index",
+    "transport": "loopback TCP",
+    "mode": "memory; RPC has no WAL",
+    "tls": false,
+    "replication": false,
+    "processes": "one Rust broker, one Node process per worker, one Node load generator, one Node coordinator on the same machine",
+    "handler": "binary echo preserving every byte; optional cooperative timer simulates I/O wait, not CPU work",
+    "brokerLimits": {
+      "maxConnections": 64,
+      "maxRpcCalls": 1024,
+      "maxRpcBytes": 16777216
+    },
+    "cpu": "ps cumulative CPU delta using midpoint timestamps of boundary samples; 100% equals one logical core; coarse precision (Linux commonly seconds); includes sampling and final drain",
+    "rss": "sampled resident memory, not guaranteed peak; shared pages can be counted in more than one process",
+    "limitations": [
+      "Closed-loop clients wait for replies before sending again; latency under a fixed external arrival rate can be worse.",
+      "Open-loop reports planned arrivals, generator drops and scheduling lag separately; dropped arrivals have no RPC latency sample.",
+      "No subtraction of handler delay from latency percentiles; no broker-only latency claim.",
+      "No comparison with Kafka, RabbitMQ, NATS, direct HTTP, or Raspberry Pi hardware.",
+      "Queue time and actual service time are not independently instrumented in the wire protocol.",
+      "All processes compete on one desktop; measured throughput can be limited by SDK, generator, worker or host."
+    ]
+  },
+  "runs": [
+    {
+      "repetition": 1,
+      "scenario": "echo-c1",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 0,
+        "queueLimit": 128,
+        "deadlineMs": 1000,
+        "name": "echo-c1",
+        "mode": "closed",
+        "replicas": 1,
+        "workerConcurrency": 1,
+        "concurrency": 1,
+        "connections": 1
+      },
+      "load": {
+        "mode": "closed",
+        "requestedDurationMs": 10000,
+        "attempts": 103541,
+        "successes": 103541,
+        "errorsByCode": {},
+        "durationMs": 10000.050042,
+        "drainMs": 0.3135409999995318,
+        "successesPerSecond": 10353.723556212826,
+        "successesWithinWindow": 103540,
+        "successesWithinWindowPerSecond": 10353.948186772483,
+        "peakPending": 1,
+        "successLatencyMs": {
+          "count": 103541,
+          "min": 0.04958299999998417,
+          "mean": 0.09639142235442917,
+          "p50": 0.07922198989348815,
+          "p95": 0.172152328725914,
+          "p99": 0.32222516158262404,
+          "max": 54.135167000000365,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": null,
+        "scheduledSuccessLatencyMs": null,
+        "scheduled": null,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 894.481,
+          "system": 1322.725,
+          "total": 2217.206
+        },
+        "cpuCoresUsed": 0.2217125389089966,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 987,
+          "mean": 10.1175806443769,
+          "p50": 10.002431,
+          "p95": 10.166271,
+          "p99": 13.123583,
+          "max": 33.882111
+        },
+        "memory": {
+          "before": {
+            "rss": 68321280,
+            "heapTotal": 10108928,
+            "heapUsed": 7121784,
+            "external": 2602649,
+            "arrayBuffers": 582209
+          },
+          "after": {
+            "rss": 22364160,
+            "heapTotal": 10371072,
+            "heapUsed": 6408496,
+            "external": 2364049,
+            "arrayBuffers": 343609
+          },
+          "peakRssBytesSampled": 68632576,
+          "peakHeapUsedBytesSampled": 7657232,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "perConnectionPendingLimit": 32
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": "Closed-loop demand waits for responses and has coordinated omission: latency cannot represent an independent fixed arrival rate.",
+        "config": {
+          "port": 63525,
+          "mode": "closed",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 1,
+          "connections": 1,
+          "payloadBytes": 256,
+          "deadlineMs": 1000
+        },
+        "warmup": {
+          "attempts": 21822,
+          "successes": 21822,
+          "errorsByCode": {},
+          "durationMs": 1999.906458,
+          "drainMs": 0.12750000000005457,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 103541,
+          "completed": 103541,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 1,
+          "running": 1,
+          "retainedBytes": 796
+        },
+        "final": {
+          "accepted": 125363,
+          "completed": 125363,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 1,
+              "name": "benchmark.echo",
+              "queueLimit": 128,
+              "queued": 0,
+              "running": 0,
+              "workers": 1
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 103541,
+          "finished": 103541,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 2572288,
+          "cpuMs": 6740,
+          "averageCpuPercentOfOneCore": 67.04361041380741
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 66273280,
+          "cpuMs": 4010,
+          "averageCpuPercentOfOneCore": 39.88796405925338
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 68632576,
+          "cpuMs": 2230,
+          "averageCpuPercentOfOneCore": 22.182084751155866
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 58605568,
+          "cpuMs": 150,
+          "averageCpuPercentOfOneCore": 1.4920684810194529
+        }
+      },
+      "resourceWindowMs": 10053.157874999999,
+      "resourceBoundaryUncertaintyMs": 12.688041999999768,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 3.3280419999991864
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 1,
+      "scenario": "echo-c32",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 0,
+        "queueLimit": 128,
+        "deadlineMs": 1000,
+        "name": "echo-c32",
+        "mode": "closed",
+        "replicas": 1,
+        "workerConcurrency": 32,
+        "concurrency": 32,
+        "connections": 1
+      },
+      "load": {
+        "mode": "closed",
+        "requestedDurationMs": 10000,
+        "attempts": 433466,
+        "successes": 433466,
+        "errorsByCode": {},
+        "durationMs": 10000.013167,
+        "drainMs": 1.4048750000001746,
+        "successesPerSecond": 43340.45414157282,
+        "successesWithinWindow": 433434,
+        "successesWithinWindowPerSecond": 43343.34292982037,
+        "peakPending": 32,
+        "successLatencyMs": {
+          "count": 433466,
+          "min": 0.14987500000097498,
+          "mean": 0.7380991877240507,
+          "p50": 0.6276123682683932,
+          "p95": 1.1630989618911447,
+          "p99": 2.334064390541848,
+          "max": 209.74966700000004,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": null,
+        "scheduledSuccessLatencyMs": null,
+        "scheduled": null,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 2197.501,
+          "system": 3425.814,
+          "total": 5623.315
+        },
+        "cpuCoresUsed": 0.5622517703375087,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 964,
+          "mean": 10.36532315352697,
+          "p50": 10.002431,
+          "p95": 10.321919,
+          "p99": 16.637951,
+          "max": 104.071167
+        },
+        "memory": {
+          "before": {
+            "rss": 79806464,
+            "heapTotal": 20070400,
+            "heapUsed": 10829224,
+            "external": 3814977,
+            "arrayBuffers": 1794537
+          },
+          "after": {
+            "rss": 52985856,
+            "heapTotal": 34226176,
+            "heapUsed": 6692584,
+            "external": 2451643,
+            "arrayBuffers": 431203
+          },
+          "peakRssBytesSampled": 81592320,
+          "peakHeapUsedBytesSampled": 19074632,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "perConnectionPendingLimit": 32
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": "Closed-loop demand waits for responses and has coordinated omission: latency cannot represent an independent fixed arrival rate.",
+        "config": {
+          "port": 63582,
+          "mode": "closed",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 32,
+          "connections": 1,
+          "payloadBytes": 256,
+          "deadlineMs": 1000
+        },
+        "warmup": {
+          "attempts": 94281,
+          "successes": 94281,
+          "errorsByCode": {},
+          "durationMs": 1999.6504579999998,
+          "drainMs": 0.36725000000001273,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 433466,
+          "completed": 433466,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 23,
+          "running": 29,
+          "retainedBytes": 25472
+        },
+        "final": {
+          "accepted": 527747,
+          "completed": 527747,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 32,
+              "name": "benchmark.echo",
+              "queueLimit": 128,
+              "queued": 0,
+              "running": 0,
+              "workers": 1
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 433466,
+          "finished": 433466,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 2785280,
+          "cpuMs": 24500,
+          "averageCpuPercentOfOneCore": 244.29734891134427
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 78807040,
+          "cpuMs": 7360,
+          "averageCpuPercentOfOneCore": 73.38891787704056
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 81592320,
+          "cpuMs": 5630,
+          "averageCpuPercentOfOneCore": 56.13853364779054
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 26869760,
+          "cpuMs": 150,
+          "averageCpuPercentOfOneCore": 1.4956980545592506
+        }
+      },
+      "resourceWindowMs": 10028.762125000003,
+      "resourceBoundaryUncertaintyMs": 6.887208000000101,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 0.8237499999995634
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 1,
+      "scenario": "echo-c128",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 0,
+        "queueLimit": 256,
+        "deadlineMs": 1000,
+        "name": "echo-c128",
+        "mode": "closed",
+        "replicas": 4,
+        "workerConcurrency": 32,
+        "concurrency": 128,
+        "connections": 4
+      },
+      "load": {
+        "mode": "closed",
+        "requestedDurationMs": 10000,
+        "attempts": 369499,
+        "successes": 369499,
+        "errorsByCode": {},
+        "durationMs": 9999.525915999999,
+        "drainMs": 13.294084000001021,
+        "successesPerSecond": 36902.59087849377,
+        "successesWithinWindow": 369376,
+        "successesWithinWindowPerSecond": 36939.35123553912,
+        "peakPending": 128,
+        "successLatencyMs": {
+          "count": 369499,
+          "min": 0.20566599999983737,
+          "mean": 3.4650828170197947,
+          "p50": 2.7918852288367653,
+          "p95": 6.635246782443339,
+          "p99": 14.418637890874813,
+          "max": 181.24583300000086,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": null,
+        "scheduledSuccessLatencyMs": null,
+        "scheduled": null,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 2421.174,
+          "system": 3447.611,
+          "total": 5868.785
+        },
+        "cpuCoresUsed": 0.5861270850769313,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 942,
+          "mean": 10.614096985138005,
+          "p50": 10.010623,
+          "p95": 13.139967,
+          "p99": 20.742143,
+          "max": 80.412671
+        },
+        "memory": {
+          "before": {
+            "rss": 82231296,
+            "heapTotal": 21905408,
+            "heapUsed": 12492592,
+            "external": 4860552,
+            "arrayBuffers": 2840112
+          },
+          "after": {
+            "rss": 37830656,
+            "heapTotal": 61751296,
+            "heapUsed": 25316544,
+            "external": 9137439,
+            "arrayBuffers": 7116999
+          },
+          "peakRssBytesSampled": 98091008,
+          "peakHeapUsedBytesSampled": 32763464,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "perConnectionPendingLimit": 32
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": "Closed-loop demand waits for responses and has coordinated omission: latency cannot represent an independent fixed arrival rate.",
+        "config": {
+          "port": 63639,
+          "mode": "closed",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 128,
+          "connections": 4,
+          "payloadBytes": 256,
+          "deadlineMs": 1000
+        },
+        "warmup": {
+          "attempts": 83018,
+          "successes": 83018,
+          "errorsByCode": {},
+          "durationMs": 1999.955333,
+          "drainMs": 2.1204999999999927,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 369499,
+          "completed": 369499,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 57,
+          "running": 80,
+          "retainedBytes": 94724
+        },
+        "final": {
+          "accepted": 452517,
+          "completed": 452517,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 128,
+              "name": "benchmark.echo",
+              "queueLimit": 256,
+              "queued": 0,
+              "running": 0,
+              "workers": 4
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 91915,
+          "finished": 91915,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 89229,
+          "finished": 89229,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 91945,
+          "finished": 91945,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 96410,
+          "finished": 96410,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 53,
+          "missingSamples": 0,
+          "rssPeakBytes": 3112960,
+          "cpuMs": 25640,
+          "averageCpuPercentOfOneCore": 253.61126935633894
+        },
+        "worker-1": {
+          "samples": 53,
+          "missingSamples": 0,
+          "rssPeakBytes": 71385088,
+          "cpuMs": 2960,
+          "averageCpuPercentOfOneCore": 29.278056056738038
+        },
+        "worker-2": {
+          "samples": 53,
+          "missingSamples": 0,
+          "rssPeakBytes": 71008256,
+          "cpuMs": 2910,
+          "averageCpuPercentOfOneCore": 28.783494299022866
+        },
+        "worker-3": {
+          "samples": 53,
+          "missingSamples": 0,
+          "rssPeakBytes": 70991872,
+          "cpuMs": 2960,
+          "averageCpuPercentOfOneCore": 29.278056056738038
+        },
+        "worker-4": {
+          "samples": 53,
+          "missingSamples": 0,
+          "rssPeakBytes": 71122944,
+          "cpuMs": 3080,
+          "averageCpuPercentOfOneCore": 30.465004275254444
+        },
+        "generator": {
+          "samples": 53,
+          "missingSamples": 0,
+          "rssPeakBytes": 97927168,
+          "cpuMs": 5870,
+          "averageCpuPercentOfOneCore": 58.0615503557609
+        },
+        "coordinator": {
+          "samples": 53,
+          "missingSamples": 0,
+          "rssPeakBytes": 25411584,
+          "cpuMs": 170,
+          "averageCpuPercentOfOneCore": 1.6815099762315764
+        }
+      },
+      "resourceWindowMs": 10109.960833000001,
+      "resourceBoundaryUncertaintyMs": 7.844292000001587,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 4.119209000004048
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 1,
+      "scenario": "echo-64k",
+      "config": {
+        "payloadBytes": 65536,
+        "handlerDelayMs": 0,
+        "queueLimit": 128,
+        "deadlineMs": 1000,
+        "name": "echo-64k",
+        "mode": "closed",
+        "replicas": 2,
+        "workerConcurrency": 16,
+        "concurrency": 32,
+        "connections": 1
+      },
+      "load": {
+        "mode": "closed",
+        "requestedDurationMs": 10000,
+        "attempts": 129597,
+        "successes": 129597,
+        "errorsByCode": {},
+        "durationMs": 10000.177083999999,
+        "drainMs": 2.1086660000000848,
+        "successesPerSecond": 12956.738413517132,
+        "successesWithinWindow": 129565,
+        "successesWithinWindowPerSecond": 12956.270565178325,
+        "peakPending": 32,
+        "successLatencyMs": {
+          "count": 129597,
+          "min": 0.5253749999992579,
+          "mean": 2.468808932714546,
+          "p50": 2.1987942378864616,
+          "p95": 4.2402870725333806,
+          "p99": 7.329440403450418,
+          "max": 129.7591250000005,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": null,
+        "scheduledSuccessLatencyMs": null,
+        "scheduled": null,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 4987.274,
+          "system": 4691.715,
+          "total": 9678.989
+        },
+        "cpuCoresUsed": 0.9676777130667358,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 912,
+          "mean": 10.956826947368421,
+          "p50": 10.534911,
+          "p95": 12.812287,
+          "p99": 17.743871,
+          "max": 93.388799
+        },
+        "memory": {
+          "before": {
+            "rss": 213204992,
+            "heapTotal": 9322496,
+            "heapUsed": 5018456,
+            "external": 31573512,
+            "arrayBuffers": 29556544
+          },
+          "after": {
+            "rss": 217759744,
+            "heapTotal": 9584640,
+            "heapUsed": 4848304,
+            "external": 53708310,
+            "arrayBuffers": 51691342
+          },
+          "peakRssBytesSampled": 238600192,
+          "peakHeapUsedBytesSampled": 5575488,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "perConnectionPendingLimit": 32
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": "Closed-loop demand waits for responses and has coordinated omission: latency cannot represent an independent fixed arrival rate.",
+        "config": {
+          "port": 63706,
+          "mode": "closed",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 32,
+          "connections": 1,
+          "payloadBytes": 65536,
+          "deadlineMs": 1000
+        },
+        "warmup": {
+          "attempts": 28718,
+          "successes": 28718,
+          "errorsByCode": {},
+          "durationMs": 2000.104042,
+          "drainMs": 1.0798330000000078,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 129597,
+          "completed": 129597,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 9,
+          "running": 32,
+          "retainedBytes": 2114432
+        },
+        "final": {
+          "accepted": 158315,
+          "completed": 158315,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 32,
+              "name": "benchmark.echo",
+              "queueLimit": 128,
+              "queued": 0,
+              "running": 0,
+              "workers": 2
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 51111,
+          "finished": 51111,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 78486,
+          "finished": 78486,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 10862592,
+          "cpuMs": 21890,
+          "averageCpuPercentOfOneCore": 218.26960600161155
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 196542464,
+          "cpuMs": 5380,
+          "averageCpuPercentOfOneCore": 53.645065339820476
+        },
+        "worker-2": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 211877888,
+          "cpuMs": 7520,
+          "averageCpuPercentOfOneCore": 74.98343705491635
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 230965248,
+          "cpuMs": 9680,
+          "averageCpuPercentOfOneCore": 96.52123280473275
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 25329664,
+          "cpuMs": 180,
+          "averageCpuPercentOfOneCore": 1.7948163124846999
+        }
+      },
+      "resourceWindowMs": 10028.881437499997,
+      "resourceBoundaryUncertaintyMs": 10.082312499998807,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 0.645541999998386
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 1,
+      "scenario": "slow-normal",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 10,
+        "queueLimit": 32,
+        "deadlineMs": 1000,
+        "mode": "open",
+        "workerConcurrency": 8,
+        "concurrency": 128,
+        "connections": 4,
+        "name": "slow-normal",
+        "replicas": 2,
+        "ratePerSecond": 800
+      },
+      "load": {
+        "mode": "open",
+        "requestedDurationMs": 10000,
+        "attempts": 8000,
+        "successes": 8000,
+        "errorsByCode": {},
+        "durationMs": 9999.917625,
+        "drainMs": 9.316165999998702,
+        "successesPerSecond": 799.2619781939112,
+        "successesWithinWindow": 7992,
+        "successesWithinWindowPerSecond": 799.2065834642312,
+        "peakPending": 13,
+        "successLatencyMs": {
+          "count": 8000,
+          "min": 9.229750000000422,
+          "mean": 10.458936179499966,
+          "p50": 10.486734530451743,
+          "p95": 11.46918711450562,
+          "p99": 11.93488210279488,
+          "max": 14.08929100000023,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": {
+          "count": 8000,
+          "min": 0.0019579999998313724,
+          "mean": 0.65354850899954,
+          "p50": 0.6402273768705878,
+          "p95": 1.2847848473477623,
+          "p99": 1.50651127532154,
+          "max": 3.8623329999991256,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduledSuccessLatencyMs": {
+          "count": 8000,
+          "min": 9.494332999998733,
+          "mean": 11.112484688499574,
+          "p50": 11.131880018077844,
+          "p95": 12.296520965391668,
+          "p99": 12.923767115891996,
+          "max": 15.282290999999532,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduled": 8000,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 414.362,
+          "system": 336.537,
+          "total": 750.899
+        },
+        "cpuCoresUsed": 0.07502062752047871,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 993,
+          "mean": 10.069754070493454,
+          "p50": 10.067967,
+          "p95": 10.764287,
+          "p99": 10.928127,
+          "max": 11.091967
+        },
+        "memory": {
+          "before": {
+            "rss": 68222976,
+            "heapTotal": 10371072,
+            "heapUsed": 7079256,
+            "external": 2343191,
+            "arrayBuffers": 322751
+          },
+          "after": {
+            "rss": 61980672,
+            "heapTotal": 10895360,
+            "heapUsed": 7469056,
+            "external": 2587357,
+            "arrayBuffers": 566917
+          },
+          "peakRssBytesSampled": 69222400,
+          "peakHeapUsedBytesSampled": 7599168,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "ratePerSecond": 800,
+          "maxCatchUpPerTick": 64,
+          "minimumTimerDelayMs": 1,
+          "perConnectionPendingLimit": 32,
+          "scheduleLagSamples": "Admitted requests only, from planned arrival to client.request invocation",
+          "dropPolicy": "Drop oldest arrivals beyond bounded catch-up; drop remaining arrivals when pending capacity is full; never admit after cutoff"
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": null,
+        "config": {
+          "port": 63767,
+          "mode": "open",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 128,
+          "connections": 4,
+          "payloadBytes": 256,
+          "deadlineMs": 1000,
+          "ratePerSecond": 800
+        },
+        "warmup": {
+          "attempts": 1600,
+          "successes": 1600,
+          "errorsByCode": {},
+          "durationMs": 2000.9122089999998,
+          "drainMs": 8.325125000000071,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 8000,
+          "completed": 8000,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 0,
+          "running": 10,
+          "retainedBytes": 7960
+        },
+        "final": {
+          "accepted": 9600,
+          "completed": 9600,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 16,
+              "name": "benchmark.echo",
+              "queueLimit": 32,
+              "queued": 0,
+              "running": 0,
+              "workers": 2
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 5,
+          "executed": 1478,
+          "finished": 1478,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 6522,
+          "finished": 6522,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 3178496,
+          "cpuMs": 1270,
+          "averageCpuPercentOfOneCore": 12.667634483982257
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 69124096,
+          "cpuMs": 310,
+          "averageCpuPercentOfOneCore": 3.092099755932677
+        },
+        "worker-2": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 68960256,
+          "cpuMs": 840,
+          "averageCpuPercentOfOneCore": 8.378592887043382
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 69222400,
+          "cpuMs": 760,
+          "averageCpuPercentOfOneCore": 7.580631659705918
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 26542080,
+          "cpuMs": 180,
+          "averageCpuPercentOfOneCore": 1.7954127615092963
+        }
+      },
+      "resourceWindowMs": 10025.549770999998,
+      "resourceBoundaryUncertaintyMs": 6.1532290000031935,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 11.553958000004059
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 1,
+      "scenario": "slow-overload",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 10,
+        "queueLimit": 32,
+        "deadlineMs": 1000,
+        "mode": "open",
+        "workerConcurrency": 8,
+        "concurrency": 128,
+        "connections": 4,
+        "name": "slow-overload",
+        "replicas": 2,
+        "ratePerSecond": 4000
+      },
+      "load": {
+        "mode": "open",
+        "requestedDurationMs": 10000,
+        "attempts": 39996,
+        "successes": 14110,
+        "errorsByCode": {
+          "9": 25886
+        },
+        "durationMs": 10000.016417,
+        "drainMs": 32.33920799999942,
+        "successesPerSecond": 1406.4493452403906,
+        "successesWithinWindow": 14064,
+        "successesWithinWindowPerSecond": 1406.3976911169104,
+        "peakPending": 79,
+        "successLatencyMs": {
+          "count": 14110,
+          "min": 10.259541999999783,
+          "mean": 32.59785388313253,
+          "p50": 32.93049501085459,
+          "p95": 34.956384023287846,
+          "p99": 36.015597415577496,
+          "max": 38.57887500000015,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 25886,
+          "min": 0.0476249999992433,
+          "mean": 0.24986118759175546,
+          "p50": 0.22298139091858493,
+          "p95": 0.4564650519605658,
+          "p99": 0.750716950013968,
+          "max": 8.109625000000051,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": {
+          "count": 39996,
+          "min": 0.017541999999593827,
+          "mean": 0.7140391635412333,
+          "p50": 0.693274508170992,
+          "p95": 1.3912378872398738,
+          "p99": 1.6476491949521026,
+          "max": 8.131624999999985,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduledSuccessLatencyMs": {
+          "count": 14110,
+          "min": 10.350916999999754,
+          "mean": 33.359027877320905,
+          "p50": 33.59239796057277,
+          "p95": 35.65900734215594,
+          "p99": 36.739510923630604,
+          "max": 41.07354200000009,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduled": 40000,
+        "generatorDropped": 4,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 4,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 1137.499,
+          "system": 746.868,
+          "total": 1884.367
+        },
+        "cpuCoresUsed": 0.18782896763590354,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 992,
+          "mean": 10.099464258064517,
+          "p50": 10.125311,
+          "p95": 10.854399,
+          "p99": 11.042815,
+          "max": 12.705791
+        },
+        "memory": {
+          "before": {
+            "rss": 73465856,
+            "heapTotal": 14041088,
+            "heapUsed": 9396960,
+            "external": 2860170,
+            "arrayBuffers": 839730
+          },
+          "after": {
+            "rss": 75169792,
+            "heapTotal": 20856832,
+            "heapUsed": 12689072,
+            "external": 3713686,
+            "arrayBuffers": 1693246
+          },
+          "peakRssBytesSampled": 75694080,
+          "peakHeapUsedBytesSampled": 12907896,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "ratePerSecond": 4000,
+          "maxCatchUpPerTick": 64,
+          "minimumTimerDelayMs": 1,
+          "perConnectionPendingLimit": 32,
+          "scheduleLagSamples": "Admitted requests only, from planned arrival to client.request invocation",
+          "dropPolicy": "Drop oldest arrivals beyond bounded catch-up; drop remaining arrivals when pending capacity is full; never admit after cutoff"
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": null,
+        "config": {
+          "port": 63842,
+          "mode": "open",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 128,
+          "connections": 4,
+          "payloadBytes": 256,
+          "deadlineMs": 1000,
+          "ratePerSecond": 4000
+        },
+        "warmup": {
+          "attempts": 7995,
+          "successes": 2864,
+          "errorsByCode": {
+            "9": 5131
+          },
+          "durationMs": 2000.4537090000001,
+          "drainMs": 23.608249999999998,
+          "generatorDropped": 5,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 5,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 14110,
+          "completed": 14110,
+          "rejected": 25886,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 32,
+          "running": 16,
+          "retainedBytes": 38208
+        },
+        "final": {
+          "accepted": 16974,
+          "completed": 16974,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 31017,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 16,
+              "name": "benchmark.echo",
+              "queueLimit": 32,
+              "queued": 0,
+              "running": 0,
+              "workers": 2
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 7070,
+          "finished": 7070,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 7040,
+          "finished": 7040,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 3293184,
+          "cpuMs": 2490,
+          "averageCpuPercentOfOneCore": 24.774297074715196
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 70057984,
+          "cpuMs": 570,
+          "averageCpuPercentOfOneCore": 5.67122463156131
+        },
+        "worker-2": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 69877760,
+          "cpuMs": 570,
+          "averageCpuPercentOfOneCore": 5.67122463156131
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 75694080,
+          "cpuMs": 1890,
+          "averageCpuPercentOfOneCore": 18.804586936229608
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 28901376,
+          "cpuMs": 160,
+          "averageCpuPercentOfOneCore": 1.5919227035961572
+        }
+      },
+      "resourceWindowMs": 10050.739249999991,
+      "resourceBoundaryUncertaintyMs": 8.072958000004292,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 11.488875000010012
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 1,
+      "scenario": "slow-scale-out",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 10,
+        "queueLimit": 32,
+        "deadlineMs": 1000,
+        "mode": "open",
+        "workerConcurrency": 8,
+        "concurrency": 128,
+        "connections": 4,
+        "name": "slow-scale-out",
+        "replicas": 4,
+        "ratePerSecond": 4000
+      },
+      "load": {
+        "mode": "open",
+        "requestedDurationMs": 10000,
+        "attempts": 39997,
+        "successes": 28355,
+        "errorsByCode": {
+          "9": 11642
+        },
+        "durationMs": 9999.362417,
+        "drainMs": 17.728957999999693,
+        "successesPerSecond": 2830.662009409892,
+        "successesWithinWindow": 28302,
+        "successesWithinWindowPerSecond": 2830.3804602464984,
+        "peakPending": 82,
+        "successLatencyMs": {
+          "count": 28355,
+          "min": 9.691125000000284,
+          "mean": 20.386436513913033,
+          "p50": 20.629736996174437,
+          "p95": 22.788063927388365,
+          "p99": 23.713350702976683,
+          "max": 30.002332999999908,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 11642,
+          "min": 0.06016700000054698,
+          "mean": 0.2562824397869887,
+          "p50": 0.21858777660874906,
+          "p95": 0.4893923192082858,
+          "p99": 0.7969011698375507,
+          "max": 4.641250000000127,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": {
+          "count": 39997,
+          "min": 0.0014999999993960955,
+          "mean": 0.6699599702974574,
+          "p50": 0.6466296506392937,
+          "p95": 1.3503217867786925,
+          "p99": 1.6476491949521026,
+          "max": 4.698834000000261,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduledSuccessLatencyMs": {
+          "count": 28355,
+          "min": 9.92041700000027,
+          "mean": 21.078092664714887,
+          "p50": 21.25483865689552,
+          "p95": 23.47856505245216,
+          "p99": 24.43188894262758,
+          "max": 30.576833999999963,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduled": 40000,
+        "generatorDropped": 3,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 3,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 861.797,
+          "system": 658.289,
+          "total": 1520.086
+        },
+        "cpuCoresUsed": 0.15174923968385984,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 991,
+          "mean": 10.091018849646822,
+          "p50": 10.092543,
+          "p95": 10.829823,
+          "p99": 11.042815,
+          "max": 11.132927
+        },
+        "memory": {
+          "before": {
+            "rss": 73285632,
+            "heapTotal": 13778944,
+            "heapUsed": 7107728,
+            "external": 2481656,
+            "arrayBuffers": 461216
+          },
+          "after": {
+            "rss": 76775424,
+            "heapTotal": 20856832,
+            "heapUsed": 7759872,
+            "external": 2731586,
+            "arrayBuffers": 711146
+          },
+          "peakRssBytesSampled": 76775424,
+          "peakHeapUsedBytesSampled": 12893752,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "ratePerSecond": 4000,
+          "maxCatchUpPerTick": 64,
+          "minimumTimerDelayMs": 1,
+          "perConnectionPendingLimit": 32,
+          "scheduleLagSamples": "Admitted requests only, from planned arrival to client.request invocation",
+          "dropPolicy": "Drop oldest arrivals beyond bounded catch-up; drop remaining arrivals when pending capacity is full; never admit after cutoff"
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": null,
+        "config": {
+          "port": 63905,
+          "mode": "open",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 128,
+          "connections": 4,
+          "payloadBytes": 256,
+          "deadlineMs": 1000,
+          "ratePerSecond": 4000
+        },
+        "warmup": {
+          "attempts": 8000,
+          "successes": 5661,
+          "errorsByCode": {
+            "9": 2339
+          },
+          "durationMs": 2000.309125,
+          "drainMs": 21.01670899999999,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 28355,
+          "completed": 28355,
+          "rejected": 11642,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 32,
+          "running": 32,
+          "retainedBytes": 50944
+        },
+        "final": {
+          "accepted": 34016,
+          "completed": 34016,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 13981,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 32,
+              "name": "benchmark.echo",
+              "queueLimit": 32,
+              "queued": 0,
+              "running": 0,
+              "workers": 4
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 7080,
+          "finished": 7080,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 7083,
+          "finished": 7083,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 7096,
+          "finished": 7096,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 7096,
+          "finished": 7096,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 3293184,
+          "cpuMs": 2930,
+          "averageCpuPercentOfOneCore": 29.192268547094624
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 69287936,
+          "cpuMs": 500,
+          "averageCpuPercentOfOneCore": 4.981615793019561
+        },
+        "worker-2": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 69009408,
+          "cpuMs": 500,
+          "averageCpuPercentOfOneCore": 4.981615793019561
+        },
+        "worker-3": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 69320704,
+          "cpuMs": 500,
+          "averageCpuPercentOfOneCore": 4.981615793019561
+        },
+        "worker-4": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 69271552,
+          "cpuMs": 500,
+          "averageCpuPercentOfOneCore": 4.981615793019561
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 76988416,
+          "cpuMs": 1530,
+          "averageCpuPercentOfOneCore": 15.243744326639854
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 29769728,
+          "cpuMs": 140,
+          "averageCpuPercentOfOneCore": 1.394852422045477
+        }
+      },
+      "resourceWindowMs": 10036.90410449999,
+      "resourceBoundaryUncertaintyMs": 8.686854500003392,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 11.314915999988443
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 2,
+      "scenario": "echo-c32",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 0,
+        "queueLimit": 128,
+        "deadlineMs": 1000,
+        "name": "echo-c32",
+        "mode": "closed",
+        "replicas": 1,
+        "workerConcurrency": 32,
+        "concurrency": 32,
+        "connections": 1
+      },
+      "load": {
+        "mode": "closed",
+        "requestedDurationMs": 10000,
+        "attempts": 529307,
+        "successes": 529307,
+        "errorsByCode": {},
+        "durationMs": 9999.365334,
+        "drainMs": 0.49008299999877636,
+        "successesPerSecond": 52931.46529900474,
+        "successesWithinWindow": 529307,
+        "successesWithinWindowPerSecond": 52934.05954478351,
+        "peakPending": 32,
+        "successLatencyMs": {
+          "count": 529307,
+          "min": 0.13412500000004002,
+          "mean": 0.6043367285148303,
+          "p50": 0.5738509824933182,
+          "p95": 0.9069478665615439,
+          "p99": 1.1864772510251569,
+          "max": 6.340500000000247,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": null,
+        "scheduledSuccessLatencyMs": null,
+        "scheduled": null,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 2554.17,
+          "system": 4090.168,
+          "total": 6644.338
+        },
+        "cpuCoresUsed": 0.6644434067221074,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 998,
+          "mean": 10.001069402805612,
+          "p50": 10.002431,
+          "p95": 10.141695,
+          "p99": 10.272767,
+          "max": 11.239423
+        },
+        "memory": {
+          "before": {
+            "rss": 77971456,
+            "heapTotal": 20070400,
+            "heapUsed": 7087096,
+            "external": 2610450,
+            "arrayBuffers": 590010
+          },
+          "after": {
+            "rss": 88260608,
+            "heapTotal": 34226176,
+            "heapUsed": 9058320,
+            "external": 3220621,
+            "arrayBuffers": 1200181
+          },
+          "peakRssBytesSampled": 88784896,
+          "peakHeapUsedBytesSampled": 19346736,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "perConnectionPendingLimit": 32
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": "Closed-loop demand waits for responses and has coordinated omission: latency cannot represent an independent fixed arrival rate.",
+        "config": {
+          "port": 63971,
+          "mode": "closed",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 32,
+          "connections": 1,
+          "payloadBytes": 256,
+          "deadlineMs": 1000
+        },
+        "warmup": {
+          "attempts": 98967,
+          "successes": 98967,
+          "errorsByCode": {},
+          "durationMs": 1999.70525,
+          "drainMs": 0.3687919999999849,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 529307,
+          "completed": 529307,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 19,
+          "running": 26,
+          "retainedBytes": 25472
+        },
+        "final": {
+          "accepted": 628274,
+          "completed": 628274,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 32,
+              "name": "benchmark.echo",
+              "queueLimit": 128,
+              "queued": 0,
+              "running": 0,
+              "workers": 1
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 529307,
+          "finished": 529307,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 2686976,
+          "cpuMs": 30510,
+          "averageCpuPercentOfOneCore": 304.74535640080535
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 88735744,
+          "cpuMs": 8320,
+          "averageCpuPercentOfOneCore": 83.1032895855359
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 90374144,
+          "cpuMs": 6650,
+          "averageCpuPercentOfOneCore": 66.42270141151607
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 27623424,
+          "cpuMs": 120,
+          "averageCpuPercentOfOneCore": 1.1986051382529217
+        }
+      },
+      "resourceWindowMs": 10011.637375000006,
+      "resourceBoundaryUncertaintyMs": 5.082457999997132,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 0.24587500000779983
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 2,
+      "scenario": "echo-c128",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 0,
+        "queueLimit": 256,
+        "deadlineMs": 1000,
+        "name": "echo-c128",
+        "mode": "closed",
+        "replicas": 4,
+        "workerConcurrency": 32,
+        "concurrency": 128,
+        "connections": 4
+      },
+      "load": {
+        "mode": "closed",
+        "requestedDurationMs": 10000,
+        "attempts": 487094,
+        "successes": 487094,
+        "errorsByCode": {},
+        "durationMs": 9999.900958,
+        "drainMs": 1.276084000000992,
+        "successesPerSecond": 48703.6673737947,
+        "successesWithinWindow": 486966,
+        "successesWithinWindowPerSecond": 48697.08230564257,
+        "peakPending": 128,
+        "successLatencyMs": {
+          "count": 487094,
+          "min": 0.17550000000028376,
+          "mean": 2.627576734698043,
+          "p50": 2.4047888756396563,
+          "p95": 4.5916232902808325,
+          "p99": 6.376341738720899,
+          "max": 21.272334000001138,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": null,
+        "scheduledSuccessLatencyMs": null,
+        "scheduled": null,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 2869.868,
+          "system": 4220.349,
+          "total": 7090.217
+        },
+        "cpuCoresUsed": 0.7089382549898469,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 986,
+          "mean": 10.126674563894523,
+          "p50": 10.002431,
+          "p95": 11.304959,
+          "p99": 12.959743,
+          "max": 16.744447
+        },
+        "memory": {
+          "before": {
+            "rss": 91176960,
+            "heapTotal": 21381120,
+            "heapUsed": 9024544,
+            "external": 4230785,
+            "arrayBuffers": 2210345
+          },
+          "after": {
+            "rss": 124256256,
+            "heapTotal": 62537728,
+            "heapUsed": 12473288,
+            "external": 5510208,
+            "arrayBuffers": 3489768
+          },
+          "peakRssBytesSampled": 130777088,
+          "peakHeapUsedBytesSampled": 32956192,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "perConnectionPendingLimit": 32
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": "Closed-loop demand waits for responses and has coordinated omission: latency cannot represent an independent fixed arrival rate.",
+        "config": {
+          "port": 64027,
+          "mode": "closed",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 128,
+          "connections": 4,
+          "payloadBytes": 256,
+          "deadlineMs": 1000
+        },
+        "warmup": {
+          "attempts": 87163,
+          "successes": 87163,
+          "errorsByCode": {},
+          "durationMs": 1999.733083,
+          "drainMs": 3.543749999999818,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 487094,
+          "completed": 487094,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 73,
+          "running": 79,
+          "retainedBytes": 101092
+        },
+        "final": {
+          "accepted": 574257,
+          "completed": 574257,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 128,
+              "name": "benchmark.echo",
+              "queueLimit": 256,
+              "queued": 0,
+              "running": 0,
+              "workers": 4
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 120722,
+          "finished": 120722,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 120377,
+          "finished": 120377,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 121579,
+          "finished": 121579,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 124416,
+          "finished": 124416,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 3473408,
+          "cpuMs": 32520,
+          "averageCpuPercentOfOneCore": 324.7897411563997
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 76300288,
+          "cpuMs": 3600,
+          "averageCpuPercentOfOneCore": 35.95458389185237
+        },
+        "worker-2": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 76300288,
+          "cpuMs": 3600,
+          "averageCpuPercentOfOneCore": 35.95458389185237
+        },
+        "worker-3": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 76447744,
+          "cpuMs": 3610,
+          "averageCpuPercentOfOneCore": 36.0544577359964
+        },
+        "worker-4": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 77643776,
+          "cpuMs": 3690,
+          "averageCpuPercentOfOneCore": 36.853448489148676
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 130777088,
+          "cpuMs": 7100,
+          "averageCpuPercentOfOneCore": 70.9104293422644
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 28540928,
+          "cpuMs": 130,
+          "averageCpuPercentOfOneCore": 1.2983599738724467
+        }
+      },
+      "resourceWindowMs": 10012.631521000003,
+      "resourceBoundaryUncertaintyMs": 5.433812000002945,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 0.465875000008964
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 2,
+      "scenario": "echo-64k",
+      "config": {
+        "payloadBytes": 65536,
+        "handlerDelayMs": 0,
+        "queueLimit": 128,
+        "deadlineMs": 1000,
+        "name": "echo-64k",
+        "mode": "closed",
+        "replicas": 2,
+        "workerConcurrency": 16,
+        "concurrency": 32,
+        "connections": 1
+      },
+      "load": {
+        "mode": "closed",
+        "requestedDurationMs": 10000,
+        "attempts": 144161,
+        "successes": 144161,
+        "errorsByCode": {},
+        "durationMs": 10000.105124999998,
+        "drainMs": 1.2479160000002594,
+        "successesPerSecond": 14414.149706446706,
+        "successesWithinWindow": 144129,
+        "successesWithinWindowPerSecond": 14412.748485981543,
+        "peakPending": 32,
+        "successLatencyMs": {
+          "count": 144161,
+          "min": 0.5964999999996508,
+          "mean": 2.2195556868917414,
+          "p50": 2.092077271456399,
+          "p95": 3.6888927334786725,
+          "p99": 4.825842224358386,
+          "max": 42.370750000000044,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": null,
+        "scheduledSuccessLatencyMs": null,
+        "scheduled": null,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 5389.58,
+          "system": 5108.893,
+          "total": 10498.473
+        },
+        "cpuCoresUsed": 1.0497052705731,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 937,
+          "mean": 10.663404875133404,
+          "p50": 10.551295,
+          "p95": 12.320767,
+          "p99": 13.058047,
+          "max": 17.137663
+        },
+        "memory": {
+          "before": {
+            "rss": 229031936,
+            "heapTotal": 9846784,
+            "heapUsed": 5068992,
+            "external": 36737220,
+            "arrayBuffers": 34720252
+          },
+          "after": {
+            "rss": 227475456,
+            "heapTotal": 9846784,
+            "heapUsed": 5002640,
+            "external": 57906922,
+            "arrayBuffers": 55889954
+          },
+          "peakRssBytesSampled": 243105792,
+          "peakHeapUsedBytesSampled": 5552232,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "perConnectionPendingLimit": 32
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": "Closed-loop demand waits for responses and has coordinated omission: latency cannot represent an independent fixed arrival rate.",
+        "config": {
+          "port": 64090,
+          "mode": "closed",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 32,
+          "connections": 1,
+          "payloadBytes": 65536,
+          "deadlineMs": 1000
+        },
+        "warmup": {
+          "attempts": 24245,
+          "successes": 24245,
+          "errorsByCode": {},
+          "durationMs": 1999.7376669999999,
+          "drainMs": 1.7358330000001843,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 144161,
+          "completed": 144161,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 8,
+          "running": 22,
+          "retainedBytes": 1916204
+        },
+        "final": {
+          "accepted": 168406,
+          "completed": 168406,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 32,
+              "name": "benchmark.echo",
+              "queueLimit": 128,
+              "queued": 0,
+              "running": 0,
+              "workers": 2
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 58068,
+          "finished": 58068,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 86093,
+          "finished": 86093,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 11075584,
+          "cpuMs": 24490,
+          "averageCpuPercentOfOneCore": 244.56710900811794
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 197885952,
+          "cpuMs": 5850,
+          "averageCpuPercentOfOneCore": 58.420481326969785
+        },
+        "worker-2": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 206995456,
+          "cpuMs": 8180,
+          "averageCpuPercentOfOneCore": 81.6888097871133
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 243105792,
+          "cpuMs": 10500,
+          "averageCpuPercentOfOneCore": 104.85727417661244
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 28327936,
+          "cpuMs": 160,
+          "averageCpuPercentOfOneCore": 1.5978251303102846
+        }
+      },
+      "resourceWindowMs": 10013.611437500003,
+      "resourceBoundaryUncertaintyMs": 5.051937499993073,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 0.2955409999995027
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 2,
+      "scenario": "slow-normal",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 10,
+        "queueLimit": 32,
+        "deadlineMs": 1000,
+        "mode": "open",
+        "workerConcurrency": 8,
+        "concurrency": 128,
+        "connections": 4,
+        "name": "slow-normal",
+        "replicas": 2,
+        "ratePerSecond": 800
+      },
+      "load": {
+        "mode": "open",
+        "requestedDurationMs": 10000,
+        "attempts": 8000,
+        "successes": 8000,
+        "errorsByCode": {},
+        "durationMs": 10000.780625,
+        "drainMs": 8.471083000000363,
+        "successesPerSecond": 799.2605474798796,
+        "successesWithinWindow": 7992,
+        "successesWithinWindowPerSecond": 799.1376173197481,
+        "peakPending": 12,
+        "successLatencyMs": {
+          "count": 8000,
+          "min": 9.20199999999977,
+          "mean": 10.435313853625003,
+          "p50": 10.486734530451743,
+          "p95": 11.355630806441209,
+          "p99": 11.93488210279488,
+          "max": 13.926542000000154,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": {
+          "count": 8000,
+          "min": 0.002583000000413449,
+          "mean": 0.6400562996249064,
+          "p50": 0.6152459251724274,
+          "p95": 1.2720642052948141,
+          "p99": 1.4768270515846877,
+          "max": 3.3348750000004657,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduledSuccessLatencyMs": {
+          "count": 8000,
+          "min": 9.297125000000051,
+          "mean": 11.075370153249905,
+          "p50": 11.131880018077844,
+          "p95": 12.296520965391668,
+          "p99": 12.79580902563564,
+          "max": 15.232375000000502,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduled": 8000,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 390.197,
+          "system": 315.7,
+          "total": 705.897
+        },
+        "cpuCoresUsed": 0.07052445283555057,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 992,
+          "mean": 10.07184929032258,
+          "p50": 10.100735,
+          "p95": 10.764287,
+          "p99": 10.936319,
+          "max": 11.108351
+        },
+        "memory": {
+          "before": {
+            "rss": 69091328,
+            "heapTotal": 9846784,
+            "heapUsed": 7150408,
+            "external": 2414376,
+            "arrayBuffers": 393936
+          },
+          "after": {
+            "rss": 62865408,
+            "heapTotal": 10895360,
+            "heapUsed": 7325632,
+            "external": 2580901,
+            "arrayBuffers": 560461
+          },
+          "peakRssBytesSampled": 70189056,
+          "peakHeapUsedBytesSampled": 7596760,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "ratePerSecond": 800,
+          "maxCatchUpPerTick": 64,
+          "minimumTimerDelayMs": 1,
+          "perConnectionPendingLimit": 32,
+          "scheduleLagSamples": "Admitted requests only, from planned arrival to client.request invocation",
+          "dropPolicy": "Drop oldest arrivals beyond bounded catch-up; drop remaining arrivals when pending capacity is full; never admit after cutoff"
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": null,
+        "config": {
+          "port": 64149,
+          "mode": "open",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 128,
+          "connections": 4,
+          "payloadBytes": 256,
+          "deadlineMs": 1000,
+          "ratePerSecond": 800
+        },
+        "warmup": {
+          "attempts": 1600,
+          "successes": 1600,
+          "errorsByCode": {},
+          "durationMs": 2000.183916,
+          "drainMs": 9.230458999999883,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 8000,
+          "completed": 8000,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 0,
+          "running": 9,
+          "retainedBytes": 7164
+        },
+        "final": {
+          "accepted": 9600,
+          "completed": 9600,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 16,
+              "name": "benchmark.echo",
+              "queueLimit": 32,
+              "queued": 0,
+              "running": 0,
+              "workers": 2
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 5,
+          "executed": 1444,
+          "finished": 1444,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 6556,
+          "finished": 6556,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 3227648,
+          "cpuMs": 1180,
+          "averageCpuPercentOfOneCore": 11.766158053837524
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 68190208,
+          "cpuMs": 280,
+          "averageCpuPercentOfOneCore": 2.79196970769026
+        },
+        "worker-2": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 69271552,
+          "cpuMs": 770,
+          "averageCpuPercentOfOneCore": 7.677916696148215
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 70189056,
+          "cpuMs": 710,
+          "averageCpuPercentOfOneCore": 7.079637473071731
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 31129600,
+          "cpuMs": 140,
+          "averageCpuPercentOfOneCore": 1.39598485384513
+        }
+      },
+      "resourceWindowMs": 10028.762103999987,
+      "resourceBoundaryUncertaintyMs": 6.73506299998553,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 11.426124999998137
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 2,
+      "scenario": "slow-overload",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 10,
+        "queueLimit": 32,
+        "deadlineMs": 1000,
+        "mode": "open",
+        "workerConcurrency": 8,
+        "concurrency": 128,
+        "connections": 4,
+        "name": "slow-overload",
+        "replicas": 2,
+        "ratePerSecond": 4000
+      },
+      "load": {
+        "mode": "open",
+        "requestedDurationMs": 10000,
+        "attempts": 39610,
+        "successes": 13989,
+        "errorsByCode": {
+          "9": 25621
+        },
+        "durationMs": 10000.063291999999,
+        "drainMs": 28.44145800000115,
+        "successesPerSecond": 1394.9238045681736,
+        "successesWithinWindow": 13941,
+        "successesWithinWindowPerSecond": 1394.0911765181256,
+        "peakPending": 126,
+        "successLatencyMs": {
+          "count": 13989,
+          "min": 10.203291999999692,
+          "mean": 32.78069025755953,
+          "p50": 32.60445050579663,
+          "p95": 34.61028121117609,
+          "p99": 37.10690603286691,
+          "max": 175.96033299999908,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 25621,
+          "min": 0.04708299999947485,
+          "mean": 0.3163443947933324,
+          "p50": 0.21642354119678126,
+          "p95": 0.46563999950497315,
+          "p99": 1.5521600734750578,
+          "max": 78.35491600000023,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": {
+          "count": 39610,
+          "min": 0.00166700000045239,
+          "mean": 0.8366136548848995,
+          "p50": 0.7002072532527019,
+          "p95": 1.4051502661122726,
+          "p99": 1.838230053216652,
+          "max": 105.93654199999946,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduledSuccessLatencyMs": {
+          "count": 13989,
+          "min": 10.328167000000121,
+          "mean": 33.63430507362908,
+          "p50": 33.259799960963136,
+          "p95": 35.65900734215594,
+          "p99": 38.231282392568815,
+          "max": 183.1664579999997,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduled": 40000,
+        "generatorDropped": 390,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 385,
+          "pendingLimit": 0,
+          "windowExpired": 5,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 1069.709,
+          "system": 705.095,
+          "total": 1774.804
+        },
+        "cpuCoresUsed": 0.17697593452304045,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 981,
+          "mean": 10.210998148827725,
+          "p50": 10.100735,
+          "p95": 10.854399,
+          "p99": 11.067391,
+          "max": 121.176063
+        },
+        "memory": {
+          "before": {
+            "rss": 69107712,
+            "heapTotal": 14041088,
+            "heapUsed": 9085920,
+            "external": 2850567,
+            "arrayBuffers": 830127
+          },
+          "after": {
+            "rss": 73760768,
+            "heapTotal": 21118976,
+            "heapUsed": 7393416,
+            "external": 2631203,
+            "arrayBuffers": 610763
+          },
+          "peakRssBytesSampled": 77512704,
+          "peakHeapUsedBytesSampled": 12893056,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "ratePerSecond": 4000,
+          "maxCatchUpPerTick": 64,
+          "minimumTimerDelayMs": 1,
+          "perConnectionPendingLimit": 32,
+          "scheduleLagSamples": "Admitted requests only, from planned arrival to client.request invocation",
+          "dropPolicy": "Drop oldest arrivals beyond bounded catch-up; drop remaining arrivals when pending capacity is full; never admit after cutoff"
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": null,
+        "config": {
+          "port": 64211,
+          "mode": "open",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 128,
+          "connections": 4,
+          "payloadBytes": 256,
+          "deadlineMs": 1000,
+          "ratePerSecond": 4000
+        },
+        "warmup": {
+          "attempts": 7997,
+          "successes": 2856,
+          "errorsByCode": {
+            "9": 5141
+          },
+          "durationMs": 1999.338417,
+          "drainMs": 32.47479099999987,
+          "generatorDropped": 3,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 3,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 13989,
+          "completed": 13989,
+          "rejected": 25621,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 32,
+          "running": 16,
+          "retainedBytes": 38208
+        },
+        "final": {
+          "accepted": 16845,
+          "completed": 16845,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 30762,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 16,
+              "name": "benchmark.echo",
+              "queueLimit": 32,
+              "queued": 0,
+              "running": 0,
+              "workers": 2
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 7004,
+          "finished": 7004,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 6985,
+          "finished": 6985,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 3194880,
+          "cpuMs": 2340,
+          "averageCpuPercentOfOneCore": 23.267257388193176
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 68976640,
+          "cpuMs": 540,
+          "averageCpuPercentOfOneCore": 5.36936708958304
+        },
+        "worker-2": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 69206016,
+          "cpuMs": 530,
+          "averageCpuPercentOfOneCore": 5.269934365701873
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 77496320,
+          "cpuMs": 1780,
+          "averageCpuPercentOfOneCore": 17.6990248508478
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 33554432,
+          "cpuMs": 170,
+          "averageCpuPercentOfOneCore": 1.690356305979846
+        }
+      },
+      "resourceWindowMs": 10057.051250000004,
+      "resourceBoundaryUncertaintyMs": 10.642500000001746,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 11.579333999980008
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 2,
+      "scenario": "slow-scale-out",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 10,
+        "queueLimit": 32,
+        "deadlineMs": 1000,
+        "mode": "open",
+        "workerConcurrency": 8,
+        "concurrency": 128,
+        "connections": 4,
+        "name": "slow-scale-out",
+        "replicas": 4,
+        "ratePerSecond": 4000
+      },
+      "load": {
+        "mode": "open",
+        "requestedDurationMs": 10000,
+        "attempts": 39995,
+        "successes": 28381,
+        "errorsByCode": {
+          "9": 11614
+        },
+        "durationMs": 10000.433875,
+        "drainMs": 15.702624999999898,
+        "successesPerSecond": 2833.527678062295,
+        "successesWithinWindow": 28325,
+        "successesWithinWindowPerSecond": 2832.3771102381293,
+        "peakPending": 81,
+        "successLatencyMs": {
+          "count": 28381,
+          "min": 9.477166000000125,
+          "mean": 20.375741495155253,
+          "p50": 20.629736996174437,
+          "p95": 22.56243953206769,
+          "p99": 23.713350702976683,
+          "max": 29.074792000000343,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 11614,
+          "min": 0.0571669999999358,
+          "mean": 0.25376307887032773,
+          "p50": 0.22077365437483656,
+          "p95": 0.47974935712997335,
+          "p99": 0.7658063607092487,
+          "max": 3.609542000000147,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": {
+          "count": 39995,
+          "min": 0.0014580000006390037,
+          "mean": 0.6952955006127808,
+          "p50": 0.6796142615145495,
+          "p95": 1.3638250046464795,
+          "p99": 1.6641256869016237,
+          "max": 2.656417000000147,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduledSuccessLatencyMs": {
+          "count": 28381,
+          "min": 10.004083000000264,
+          "mean": 21.096523927522025,
+          "p50": 21.467387043464473,
+          "p95": 23.47856505245216,
+          "p99": 24.43188894262758,
+          "max": 29.68383300000005,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduled": 40000,
+        "generatorDropped": 5,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 5,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 876.538,
+          "system": 675.29,
+          "total": 1551.828
+        },
+        "cpuCoresUsed": 0.15493279269906116,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 991,
+          "mean": 10.096598668012108,
+          "p50": 10.092543,
+          "p95": 10.887167,
+          "p99": 11.051007,
+          "max": 11.395071
+        },
+        "memory": {
+          "before": {
+            "rss": 67682304,
+            "heapTotal": 13516800,
+            "heapUsed": 6853184,
+            "external": 2472649,
+            "arrayBuffers": 452209
+          },
+          "after": {
+            "rss": 72122368,
+            "heapTotal": 20856832,
+            "heapUsed": 10715296,
+            "external": 3402631,
+            "arrayBuffers": 1382191
+          },
+          "peakRssBytesSampled": 77840384,
+          "peakHeapUsedBytesSampled": 12817872,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "ratePerSecond": 4000,
+          "maxCatchUpPerTick": 64,
+          "minimumTimerDelayMs": 1,
+          "perConnectionPendingLimit": 32,
+          "scheduleLagSamples": "Admitted requests only, from planned arrival to client.request invocation",
+          "dropPolicy": "Drop oldest arrivals beyond bounded catch-up; drop remaining arrivals when pending capacity is full; never admit after cutoff"
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": null,
+        "config": {
+          "port": 64274,
+          "mode": "open",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 128,
+          "connections": 4,
+          "payloadBytes": 256,
+          "deadlineMs": 1000,
+          "ratePerSecond": 4000
+        },
+        "warmup": {
+          "attempts": 7996,
+          "successes": 5746,
+          "errorsByCode": {
+            "9": 2250
+          },
+          "durationMs": 2000.0907499999998,
+          "drainMs": 19.764250000000175,
+          "generatorDropped": 4,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 4,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 28381,
+          "completed": 28381,
+          "rejected": 11614,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 32,
+          "running": 32,
+          "retainedBytes": 50944
+        },
+        "final": {
+          "accepted": 34127,
+          "completed": 34127,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 13864,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 32,
+              "name": "benchmark.echo",
+              "queueLimit": 32,
+              "queued": 0,
+              "running": 0,
+              "workers": 4
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 7084,
+          "finished": 7084,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 7096,
+          "finished": 7096,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 7091,
+          "finished": 7091,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 7110,
+          "finished": 7110,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 2932736,
+          "cpuMs": 3020,
+          "averageCpuPercentOfOneCore": 30.0880769302161
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 66371584,
+          "cpuMs": 510,
+          "averageCpuPercentOfOneCore": 5.081099084241792
+        },
+        "worker-2": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 66207744,
+          "cpuMs": 520,
+          "averageCpuPercentOfOneCore": 5.1807284780504546
+        },
+        "worker-3": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 65208320,
+          "cpuMs": 510,
+          "averageCpuPercentOfOneCore": 5.081099084241792
+        },
+        "worker-4": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 65159168,
+          "cpuMs": 520,
+          "averageCpuPercentOfOneCore": 5.1807284780504546
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 77840384,
+          "cpuMs": 1560,
+          "averageCpuPercentOfOneCore": 15.542185434151364
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 27607040,
+          "cpuMs": 140,
+          "averageCpuPercentOfOneCore": 1.3948115133212762
+        }
+      },
+      "resourceWindowMs": 10037.198478999999,
+      "resourceBoundaryUncertaintyMs": 7.891353999992134,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 11.604874999989988
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 2,
+      "scenario": "echo-c1",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 0,
+        "queueLimit": 128,
+        "deadlineMs": 1000,
+        "name": "echo-c1",
+        "mode": "closed",
+        "replicas": 1,
+        "workerConcurrency": 1,
+        "concurrency": 1,
+        "connections": 1
+      },
+      "load": {
+        "mode": "closed",
+        "requestedDurationMs": 10000,
+        "attempts": 121586,
+        "successes": 121586,
+        "errorsByCode": {},
+        "durationMs": 9999.991166,
+        "drainMs": 0.09770899999966787,
+        "successesPerSecond": 12158.491941402872,
+        "successesWithinWindow": 121585,
+        "successesWithinWindowPerSecond": 12158.51074082839,
+        "peakPending": 1,
+        "successLatencyMs": {
+          "count": 121586,
+          "min": 0.04879199999959383,
+          "mean": 0.08209751806129138,
+          "p50": 0.07843761375592886,
+          "p95": 0.11678291847040308,
+          "p99": 0.1791424036030243,
+          "max": 4.550916000000143,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": null,
+        "scheduledSuccessLatencyMs": null,
+        "scheduled": null,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 976.874,
+          "system": 1435.073,
+          "total": 2411.947
+        },
+        "cpuCoresUsed": 0.241192556401155,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 998,
+          "mean": 10.003154340681363,
+          "p50": 10.002431,
+          "p95": 10.051583,
+          "p99": 10.067967,
+          "max": 13.819903
+        },
+        "memory": {
+          "before": {
+            "rss": 77201408,
+            "heapTotal": 9846784,
+            "heapUsed": 7039632,
+            "external": 2532002,
+            "arrayBuffers": 511562
+          },
+          "after": {
+            "rss": 58048512,
+            "heapTotal": 10371072,
+            "heapUsed": 6330896,
+            "external": 2360552,
+            "arrayBuffers": 340112
+          },
+          "peakRssBytesSampled": 77463552,
+          "peakHeapUsedBytesSampled": 7647424,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "perConnectionPendingLimit": 32
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": "Closed-loop demand waits for responses and has coordinated omission: latency cannot represent an independent fixed arrival rate.",
+        "config": {
+          "port": 64342,
+          "mode": "closed",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 1,
+          "connections": 1,
+          "payloadBytes": 256,
+          "deadlineMs": 1000
+        },
+        "warmup": {
+          "attempts": 23602,
+          "successes": 23602,
+          "errorsByCode": {},
+          "durationMs": 1999.706042,
+          "drainMs": 0.30950000000007094,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 121586,
+          "completed": 121586,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 1,
+          "running": 1,
+          "retainedBytes": 796
+        },
+        "final": {
+          "accepted": 145188,
+          "completed": 145188,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 1,
+              "name": "benchmark.echo",
+              "queueLimit": 128,
+              "queued": 0,
+              "running": 0,
+              "workers": 1
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 121586,
+          "finished": 121586,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 3047424,
+          "cpuMs": 7400,
+          "averageCpuPercentOfOneCore": 73.91863083317024
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 72531968,
+          "cpuMs": 4450,
+          "averageCpuPercentOfOneCore": 44.451068541568596
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 77463552,
+          "cpuMs": 2420,
+          "averageCpuPercentOfOneCore": 24.173390083279997
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 28721152,
+          "cpuMs": 90,
+          "averageCpuPercentOfOneCore": 0.8990103749980165
+        }
+      },
+      "resourceWindowMs": 10011.007937500006,
+      "resourceBoundaryUncertaintyMs": 4.524770499992883,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 0.2445000000006985
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 3,
+      "scenario": "echo-c128",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 0,
+        "queueLimit": 256,
+        "deadlineMs": 1000,
+        "name": "echo-c128",
+        "mode": "closed",
+        "replicas": 4,
+        "workerConcurrency": 32,
+        "concurrency": 128,
+        "connections": 4
+      },
+      "load": {
+        "mode": "closed",
+        "requestedDurationMs": 10000,
+        "attempts": 481731,
+        "successes": 481731,
+        "errorsByCode": {},
+        "durationMs": 9999.918209,
+        "drainMs": 2.136666000000332,
+        "successesPerSecond": 48163.203063810426,
+        "successesWithinWindow": 481603,
+        "successesWithinWindowPerSecond": 48160.69391113157,
+        "peakPending": 128,
+        "successLatencyMs": {
+          "count": 481731,
+          "min": 0.1683339999999589,
+          "mean": 2.6569745934702524,
+          "p50": 2.4288367643960527,
+          "p95": 4.683914918415478,
+          "p99": 6.701599250267773,
+          "max": 76.42799999999988,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": null,
+        "scheduledSuccessLatencyMs": null,
+        "scheduled": null,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 2836.111,
+          "system": 4196.453,
+          "total": 7032.564
+        },
+        "cpuCoresUsed": 0.703111919289485,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 985,
+          "mean": 10.138914046700508,
+          "p50": 10.002431,
+          "p95": 11.411455,
+          "p99": 13.778943,
+          "max": 17.006591
+        },
+        "memory": {
+          "before": {
+            "rss": 98418688,
+            "heapTotal": 27672576,
+            "heapUsed": 11089808,
+            "external": 4088177,
+            "arrayBuffers": 2067737
+          },
+          "after": {
+            "rss": 123109376,
+            "heapTotal": 62537728,
+            "heapUsed": 10024976,
+            "external": 3760073,
+            "arrayBuffers": 1739633
+          },
+          "peakRssBytesSampled": 130891776,
+          "peakHeapUsedBytesSampled": 32620264,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "perConnectionPendingLimit": 32
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": "Closed-loop demand waits for responses and has coordinated omission: latency cannot represent an independent fixed arrival rate.",
+        "config": {
+          "port": 64402,
+          "mode": "closed",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 128,
+          "connections": 4,
+          "payloadBytes": 256,
+          "deadlineMs": 1000
+        },
+        "warmup": {
+          "attempts": 91783,
+          "successes": 91783,
+          "errorsByCode": {},
+          "durationMs": 1999.429083,
+          "drainMs": 2.614875000000211,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 481731,
+          "completed": 481731,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 58,
+          "running": 78,
+          "retainedBytes": 93928
+        },
+        "final": {
+          "accepted": 573514,
+          "completed": 573514,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 128,
+              "name": "benchmark.echo",
+              "queueLimit": 256,
+              "queued": 0,
+              "running": 0,
+              "workers": 4
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 118561,
+          "finished": 118561,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 119577,
+          "finished": 119577,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 120439,
+          "finished": 120439,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 123154,
+          "finished": 123154,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 3211264,
+          "cpuMs": 32610,
+          "averageCpuPercentOfOneCore": 325.6662031080073
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 76808192,
+          "cpuMs": 3550,
+          "averageCpuPercentOfOneCore": 35.45277586732371
+        },
+        "worker-2": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 77496320,
+          "cpuMs": 3590,
+          "averageCpuPercentOfOneCore": 35.852243764420315
+        },
+        "worker-3": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 76513280,
+          "cpuMs": 3600,
+          "averageCpuPercentOfOneCore": 35.952110738694465
+        },
+        "worker-4": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 76038144,
+          "cpuMs": 3690,
+          "averageCpuPercentOfOneCore": 36.85091350716183
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 130662400,
+          "cpuMs": 7040,
+          "averageCpuPercentOfOneCore": 70.3063498890025
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 31129600,
+          "cpuMs": 130,
+          "averageCpuPercentOfOneCore": 1.2982706655639666
+        }
+      },
+      "resourceWindowMs": 10013.32029199999,
+      "resourceBoundaryUncertaintyMs": 4.505124999996042,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 0.365416999993613
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 3,
+      "scenario": "echo-64k",
+      "config": {
+        "payloadBytes": 65536,
+        "handlerDelayMs": 0,
+        "queueLimit": 128,
+        "deadlineMs": 1000,
+        "name": "echo-64k",
+        "mode": "closed",
+        "replicas": 2,
+        "workerConcurrency": 16,
+        "concurrency": 32,
+        "connections": 1
+      },
+      "load": {
+        "mode": "closed",
+        "requestedDurationMs": 10000,
+        "attempts": 144998,
+        "successes": 144998,
+        "errorsByCode": {},
+        "durationMs": 10000.231708000001,
+        "drainMs": 0.7050419999995938,
+        "successesPerSecond": 14498.441858458908,
+        "successesWithinWindow": 144966,
+        "successesWithinWindowPerSecond": 14496.264109963558,
+        "peakPending": 32,
+        "successLatencyMs": {
+          "count": 144998,
+          "min": 0.592291999999361,
+          "mean": 2.2066943811914697,
+          "p50": 2.092077271456399,
+          "p95": 3.5804029438762774,
+          "p99": 4.87410064660197,
+          "max": 16.18000000000029,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": null,
+        "scheduledSuccessLatencyMs": null,
+        "scheduled": null,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 5304.357,
+          "system": 5148.182,
+          "total": 10452.539
+        },
+        "cpuCoresUsed": 1.0451559950121672,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 940,
+          "mean": 10.620627336170214,
+          "p50": 10.452991,
+          "p95": 12.369919,
+          "p99": 13.049855,
+          "max": 19.628031
+        },
+        "memory": {
+          "before": {
+            "rss": 221691904,
+            "heapTotal": 9584640,
+            "heapUsed": 5543000,
+            "external": 67303657,
+            "arrayBuffers": 65286689
+          },
+          "after": {
+            "rss": 226967552,
+            "heapTotal": 9584640,
+            "heapUsed": 5006304,
+            "external": 58890015,
+            "arrayBuffers": 56873047
+          },
+          "peakRssBytesSampled": 226967552,
+          "peakHeapUsedBytesSampled": 5647992,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "perConnectionPendingLimit": 32
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": "Closed-loop demand waits for responses and has coordinated omission: latency cannot represent an independent fixed arrival rate.",
+        "config": {
+          "port": 64479,
+          "mode": "closed",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 32,
+          "connections": 1,
+          "payloadBytes": 65536,
+          "deadlineMs": 1000
+        },
+        "warmup": {
+          "attempts": 28400,
+          "successes": 28400,
+          "errorsByCode": {},
+          "durationMs": 1999.7651250000001,
+          "drainMs": 1.24675000000002,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 144998,
+          "completed": 144998,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 6,
+          "running": 21,
+          "retainedBytes": 1585824
+        },
+        "final": {
+          "accepted": 173398,
+          "completed": 173398,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 32,
+              "name": "benchmark.echo",
+              "queueLimit": 128,
+              "queued": 0,
+              "running": 0,
+              "workers": 2
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 58436,
+          "finished": 58436,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 86562,
+          "finished": 86562,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 11436032,
+          "cpuMs": 24730,
+          "averageCpuPercentOfOneCore": 246.981157612288
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 205225984,
+          "cpuMs": 6130,
+          "averageCpuPercentOfOneCore": 61.220966282382754
+        },
+        "worker-2": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 200294400,
+          "cpuMs": 8320,
+          "averageCpuPercentOfOneCore": 83.09273074541998
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 227164160,
+          "cpuMs": 10450,
+          "averageCpuPercentOfOneCore": 104.36526878481236
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 29523968,
+          "cpuMs": 140,
+          "averageCpuPercentOfOneCore": 1.3981949885046632
+        }
+      },
+      "resourceWindowMs": 10012.90958349999,
+      "resourceBoundaryUncertaintyMs": 5.4867914999922505,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 0.24408399997628294
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 3,
+      "scenario": "slow-normal",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 10,
+        "queueLimit": 32,
+        "deadlineMs": 1000,
+        "mode": "open",
+        "workerConcurrency": 8,
+        "concurrency": 128,
+        "connections": 4,
+        "name": "slow-normal",
+        "replicas": 2,
+        "ratePerSecond": 800
+      },
+      "load": {
+        "mode": "open",
+        "requestedDurationMs": 10000,
+        "attempts": 7999,
+        "successes": 7999,
+        "errorsByCode": {},
+        "durationMs": 9999.7045,
+        "drainMs": 12.520916999999827,
+        "successesPerSecond": 798.9232829714665,
+        "successesWithinWindow": 7991,
+        "successesWithinWindowPerSecond": 799.1236141027968,
+        "peakPending": 12,
+        "successLatencyMs": {
+          "count": 7999,
+          "min": 9.18854199999987,
+          "mean": 10.434287030878822,
+          "p50": 10.486734530451743,
+          "p95": 11.355630806441209,
+          "p99": 11.816714953262258,
+          "max": 13.945958000000246,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": {
+          "count": 7999,
+          "min": 0.001916999999593827,
+          "mean": 0.6437519102385386,
+          "p50": 0.6276123682683932,
+          "p95": 1.2594695101928852,
+          "p99": 1.4333937864611292,
+          "max": 2.423208000000159,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduledSuccessLatencyMs": {
+          "count": 7999,
+          "min": 9.29045799999949,
+          "mean": 11.078038941117413,
+          "p50": 11.131880018077844,
+          "p95": 12.174773233061057,
+          "p99": 12.79580902563564,
+          "max": 14.620375000000422,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduled": 8000,
+        "generatorDropped": 1,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 1,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 383.668,
+          "system": 311.819,
+          "total": 695.487
+        },
+        "cpuCoresUsed": 0.06946377763520144,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 992,
+          "mean": 10.078455741935484,
+          "p50": 10.133503,
+          "p95": 10.764287,
+          "p99": 10.928127,
+          "max": 11.100159
+        },
+        "memory": {
+          "before": {
+            "rss": 60522496,
+            "heapTotal": 10371072,
+            "heapUsed": 7009144,
+            "external": 2343191,
+            "arrayBuffers": 322751
+          },
+          "after": {
+            "rss": 60801024,
+            "heapTotal": 10633216,
+            "heapUsed": 7501368,
+            "external": 2587088,
+            "arrayBuffers": 566648
+          },
+          "peakRssBytesSampled": 62881792,
+          "peakHeapUsedBytesSampled": 7528400,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "ratePerSecond": 800,
+          "maxCatchUpPerTick": 64,
+          "minimumTimerDelayMs": 1,
+          "perConnectionPendingLimit": 32,
+          "scheduleLagSamples": "Admitted requests only, from planned arrival to client.request invocation",
+          "dropPolicy": "Drop oldest arrivals beyond bounded catch-up; drop remaining arrivals when pending capacity is full; never admit after cutoff"
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": null,
+        "config": {
+          "port": 64543,
+          "mode": "open",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 128,
+          "connections": 4,
+          "payloadBytes": 256,
+          "deadlineMs": 1000,
+          "ratePerSecond": 800
+        },
+        "warmup": {
+          "attempts": 1600,
+          "successes": 1600,
+          "errorsByCode": {},
+          "durationMs": 2000.4518750000002,
+          "drainMs": 10.040749999999889,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 7999,
+          "completed": 7999,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 0,
+          "running": 10,
+          "retainedBytes": 7960
+        },
+        "final": {
+          "accepted": 9599,
+          "completed": 9599,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 16,
+              "name": "benchmark.echo",
+              "queueLimit": 32,
+              "queued": 0,
+              "running": 0,
+              "workers": 2
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 5,
+          "executed": 1460,
+          "finished": 1460,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 6539,
+          "finished": 6539,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 2621440,
+          "cpuMs": 1110,
+          "averageCpuPercentOfOneCore": 11.060171745310186
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 60850176,
+          "cpuMs": 270,
+          "averageCpuPercentOfOneCore": 2.6903120461565315
+        },
+        "worker-2": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 61063168,
+          "cpuMs": 750,
+          "averageCpuPercentOfOneCore": 7.4730890171014765
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 62881792,
+          "cpuMs": 700,
+          "averageCpuPercentOfOneCore": 6.974883082628045
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 27967488,
+          "cpuMs": 140,
+          "averageCpuPercentOfOneCore": 1.394976616525609
+        }
+      },
+      "resourceWindowMs": 10036.010521000004,
+      "resourceBoundaryUncertaintyMs": 10.863311999986763,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 11.175374999991618
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 3,
+      "scenario": "slow-overload",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 10,
+        "queueLimit": 32,
+        "deadlineMs": 1000,
+        "mode": "open",
+        "workerConcurrency": 8,
+        "concurrency": 128,
+        "connections": 4,
+        "name": "slow-overload",
+        "replicas": 2,
+        "ratePerSecond": 4000
+      },
+      "load": {
+        "mode": "open",
+        "requestedDurationMs": 10000,
+        "attempts": 40000,
+        "successes": 14269,
+        "errorsByCode": {
+          "9": 25731
+        },
+        "durationMs": 10000.068792,
+        "drainMs": 35.18091699999968,
+        "successesPerSecond": 1421.8878865767545,
+        "successesWithinWindow": 14225,
+        "successesWithinWindowPerSecond": 1422.4902144053171,
+        "peakPending": 57,
+        "successLatencyMs": {
+          "count": 14269,
+          "min": 10.200374999999894,
+          "mean": 32.22443343626049,
+          "p50": 32.60445050579663,
+          "p95": 34.267605159580285,
+          "p99": 35.30594786352073,
+          "max": 36.58320800000001,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 25731,
+          "min": 0.05458399999952235,
+          "mean": 0.22119579141891024,
+          "p50": 0.2038807657812703,
+          "p95": 0.3971076921115795,
+          "p99": 0.5514595148382314,
+          "max": 1.799124999999549,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": {
+          "count": 40000,
+          "min": 0.016375000000152795,
+          "mean": 0.6967553832251555,
+          "p50": 0.6796142615145495,
+          "p95": 1.3638250046464795,
+          "p99": 1.5833584909519065,
+          "max": 2.3721669999995356,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduledSuccessLatencyMs": {
+          "count": 14269,
+          "min": 10.27008399999977,
+          "mean": 32.96876509692365,
+          "p50": 33.259799960963136,
+          "p95": 35.30594786352073,
+          "p99": 36.015597415577496,
+          "max": 37.39891699999998,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduled": 40000,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 1021.001,
+          "system": 697.361,
+          "total": 1718.362
+        },
+        "cpuCoresUsed": 0.1712326100325044,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 993,
+          "mean": 10.087045542799597,
+          "p50": 10.084351,
+          "p95": 10.887167,
+          "p99": 11.026431,
+          "max": 11.100159
+        },
+        "memory": {
+          "before": {
+            "rss": 69025792,
+            "heapTotal": 13778944,
+            "heapUsed": 7191280,
+            "external": 2541401,
+            "arrayBuffers": 520961
+          },
+          "after": {
+            "rss": 74530816,
+            "heapTotal": 20856832,
+            "heapUsed": 7922240,
+            "external": 2709968,
+            "arrayBuffers": 689528
+          },
+          "peakRssBytesSampled": 76988416,
+          "peakHeapUsedBytesSampled": 12879280,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "ratePerSecond": 4000,
+          "maxCatchUpPerTick": 64,
+          "minimumTimerDelayMs": 1,
+          "perConnectionPendingLimit": 32,
+          "scheduleLagSamples": "Admitted requests only, from planned arrival to client.request invocation",
+          "dropPolicy": "Drop oldest arrivals beyond bounded catch-up; drop remaining arrivals when pending capacity is full; never admit after cutoff"
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": null,
+        "config": {
+          "port": 64610,
+          "mode": "open",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 128,
+          "connections": 4,
+          "payloadBytes": 256,
+          "deadlineMs": 1000,
+          "ratePerSecond": 4000
+        },
+        "warmup": {
+          "attempts": 7996,
+          "successes": 2824,
+          "errorsByCode": {
+            "9": 5172
+          },
+          "durationMs": 2000.5025,
+          "drainMs": 23.118167000000085,
+          "generatorDropped": 4,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 4,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 14269,
+          "completed": 14269,
+          "rejected": 25731,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 32,
+          "running": 16,
+          "retainedBytes": 38208
+        },
+        "final": {
+          "accepted": 17093,
+          "completed": 17093,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 30903,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 16,
+              "name": "benchmark.echo",
+              "queueLimit": 32,
+              "queued": 0,
+              "running": 0,
+              "workers": 2
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 7137,
+          "finished": 7137,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 7132,
+          "finished": 7132,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 2883584,
+          "cpuMs": 2300,
+          "averageCpuPercentOfOneCore": 22.86515588825121
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 65142784,
+          "cpuMs": 530,
+          "averageCpuPercentOfOneCore": 5.268927226423105
+        },
+        "worker-2": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 66813952,
+          "cpuMs": 540,
+          "averageCpuPercentOfOneCore": 5.368340947676371
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 76988416,
+          "cpuMs": 1730,
+          "averageCpuPercentOfOneCore": 17.19857377681504
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 30408704,
+          "cpuMs": 140,
+          "averageCpuPercentOfOneCore": 1.3917920975457259
+        }
+      },
+      "resourceWindowMs": 10058.97362450001,
+      "resourceBoundaryUncertaintyMs": 9.31704149999132,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 11.009416999993846
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 3,
+      "scenario": "slow-scale-out",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 10,
+        "queueLimit": 32,
+        "deadlineMs": 1000,
+        "mode": "open",
+        "workerConcurrency": 8,
+        "concurrency": 128,
+        "connections": 4,
+        "name": "slow-scale-out",
+        "replicas": 4,
+        "ratePerSecond": 4000
+      },
+      "load": {
+        "mode": "open",
+        "requestedDurationMs": 10000,
+        "attempts": 39003,
+        "successes": 27397,
+        "errorsByCode": {
+          "9": 11606
+        },
+        "durationMs": 10000.3725,
+        "drainMs": 19.412500000000364,
+        "successesPerSecond": 2734.2902068257954,
+        "successesWithinWindow": 27341,
+        "successesWithinWindowPerSecond": 2733.9981585685937,
+        "peakPending": 128,
+        "successLatencyMs": {
+          "count": 27397,
+          "min": 9.871374999999716,
+          "mean": 21.131375891265545,
+          "p50": 20.629736996174437,
+          "p95": 23.47856505245216,
+          "p99": 28.364664583438156,
+          "max": 300.7380000000003,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 11606,
+          "min": 0.060790999999881024,
+          "mean": 1.5967932263484472,
+          "p50": 0.21005855686520858,
+          "p95": 0.9344292938662253,
+          "p99": 4.412459731229396,
+          "max": 237.92962499999976,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": {
+          "count": 39003,
+          "min": 0.008875000000443833,
+          "mean": 0.7539968726765877,
+          "p50": 0.6596269066171435,
+          "p95": 1.4333937864611292,
+          "p99": 2.5274572766659573,
+          "max": 23.1528330000001,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduledSuccessLatencyMs": {
+          "count": 27397,
+          "min": 10.232915999999932,
+          "mean": 21.866338183852378,
+          "p50": 21.25483865689552,
+          "p95": 24.189989052106515,
+          "p99": 30.10966302035812,
+          "max": 301.7168330000004,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduled": 40000,
+        "generatorDropped": 997,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 835,
+          "pendingLimit": 158,
+          "windowExpired": 4,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 763.229,
+          "system": 603.565,
+          "total": 1366.794
+        },
+        "cpuCoresUsed": 0.13640951377699223,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 965,
+          "mean": 10.37378427357513,
+          "p50": 10.092543,
+          "p95": 10.862591,
+          "p99": 11.255807,
+          "max": 153.747455
+        },
+        "memory": {
+          "before": {
+            "rss": 67272704,
+            "heapTotal": 13254656,
+            "heapUsed": 7005728,
+            "external": 2480112,
+            "arrayBuffers": 459672
+          },
+          "after": {
+            "rss": 66781184,
+            "heapTotal": 20856832,
+            "heapUsed": 9662952,
+            "external": 3217842,
+            "arrayBuffers": 1197402
+          },
+          "peakRssBytesSampled": 69746688,
+          "peakHeapUsedBytesSampled": 12868168,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "ratePerSecond": 4000,
+          "maxCatchUpPerTick": 64,
+          "minimumTimerDelayMs": 1,
+          "perConnectionPendingLimit": 32,
+          "scheduleLagSamples": "Admitted requests only, from planned arrival to client.request invocation",
+          "dropPolicy": "Drop oldest arrivals beyond bounded catch-up; drop remaining arrivals when pending capacity is full; never admit after cutoff"
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": null,
+        "config": {
+          "port": 64675,
+          "mode": "open",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 128,
+          "connections": 4,
+          "payloadBytes": 256,
+          "deadlineMs": 1000,
+          "ratePerSecond": 4000
+        },
+        "warmup": {
+          "attempts": 7993,
+          "successes": 5709,
+          "errorsByCode": {
+            "9": 2284
+          },
+          "durationMs": 1999.5020829999999,
+          "drainMs": 19.742209000000003,
+          "generatorDropped": 7,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 7,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 27397,
+          "completed": 27397,
+          "rejected": 11606,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 32,
+          "running": 32,
+          "retainedBytes": 50944
+        },
+        "final": {
+          "accepted": 33106,
+          "completed": 33106,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 13890,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 32,
+              "name": "benchmark.echo",
+              "queueLimit": 32,
+              "queued": 0,
+              "running": 0,
+              "workers": 4
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 6848,
+          "finished": 6848,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 6845,
+          "finished": 6845,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 6854,
+          "finished": 6854,
+          "handlerErrors": 0,
+          "errors": []
+        },
+        {
+          "active": 0,
+          "peak": 8,
+          "executed": 6850,
+          "finished": 6850,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 51,
+          "missingSamples": 0,
+          "rssPeakBytes": 2916352,
+          "cpuMs": 2470,
+          "averageCpuPercentOfOneCore": 24.614501836781887
+        },
+        "worker-1": {
+          "samples": 51,
+          "missingSamples": 0,
+          "rssPeakBytes": 64897024,
+          "cpuMs": 460,
+          "averageCpuPercentOfOneCore": 4.584077265149663
+        },
+        "worker-2": {
+          "samples": 51,
+          "missingSamples": 0,
+          "rssPeakBytes": 64241664,
+          "cpuMs": 460,
+          "averageCpuPercentOfOneCore": 4.584077265149663
+        },
+        "worker-3": {
+          "samples": 51,
+          "missingSamples": 0,
+          "rssPeakBytes": 64978944,
+          "cpuMs": 470,
+          "averageCpuPercentOfOneCore": 4.683731118739873
+        },
+        "worker-4": {
+          "samples": 51,
+          "missingSamples": 0,
+          "rssPeakBytes": 64749568,
+          "cpuMs": 470,
+          "averageCpuPercentOfOneCore": 4.683731118739873
+        },
+        "generator": {
+          "samples": 51,
+          "missingSamples": 0,
+          "rssPeakBytes": 69746688,
+          "cpuMs": 1360,
+          "averageCpuPercentOfOneCore": 13.55292408826857
+        },
+        "coordinator": {
+          "samples": 51,
+          "missingSamples": 0,
+          "rssPeakBytes": 29442048,
+          "cpuMs": 110,
+          "averageCpuPercentOfOneCore": 1.0961923894923107
+        }
+      },
+      "resourceWindowMs": 10034.73487450002,
+      "resourceBoundaryUncertaintyMs": 7.087166500001331,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 11.451040999992983
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 3,
+      "scenario": "echo-c1",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 0,
+        "queueLimit": 128,
+        "deadlineMs": 1000,
+        "name": "echo-c1",
+        "mode": "closed",
+        "replicas": 1,
+        "workerConcurrency": 1,
+        "concurrency": 1,
+        "connections": 1
+      },
+      "load": {
+        "mode": "closed",
+        "requestedDurationMs": 10000,
+        "attempts": 99652,
+        "successes": 99652,
+        "errorsByCode": {},
+        "durationMs": 9999.3295,
+        "drainMs": 0.09070799999972223,
+        "successesPerSecond": 9965.777807824676,
+        "successesWithinWindow": 99652,
+        "successesWithinWindowPerSecond": 9965.86821146358,
+        "peakPending": 1,
+        "successLatencyMs": {
+          "count": 99652,
+          "min": 0.04991700000027777,
+          "mean": 0.10014715153735172,
+          "p50": 0.07922198989348815,
+          "p95": 0.17387385201317312,
+          "p99": 0.33866188321843427,
+          "max": 228.6937909999997,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": null,
+        "scheduledSuccessLatencyMs": null,
+        "scheduled": null,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 850.199,
+          "system": 1270.7,
+          "total": 2120.899
+        },
+        "cpuCoresUsed": 0.2121021975157302,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 955,
+          "mean": 10.45556540314136,
+          "p50": 10.002431,
+          "p95": 10.338303,
+          "p99": 14.934015,
+          "max": 184.680447
+        },
+        "memory": {
+          "before": {
+            "rss": 66682880,
+            "heapTotal": 9846784,
+            "heapUsed": 7447512,
+            "external": 2690781,
+            "arrayBuffers": 670341
+          },
+          "after": {
+            "rss": 16367616,
+            "heapTotal": 10633216,
+            "heapUsed": 6835680,
+            "external": 2458637,
+            "arrayBuffers": 438197
+          },
+          "peakRssBytesSampled": 67059712,
+          "peakHeapUsedBytesSampled": 7631184,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "perConnectionPendingLimit": 32
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": "Closed-loop demand waits for responses and has coordinated omission: latency cannot represent an independent fixed arrival rate.",
+        "config": {
+          "port": 64744,
+          "mode": "closed",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 1,
+          "connections": 1,
+          "payloadBytes": 256,
+          "deadlineMs": 1000
+        },
+        "warmup": {
+          "attempts": 23167,
+          "successes": 23167,
+          "errorsByCode": {},
+          "durationMs": 1999.349458,
+          "drainMs": 0.1349999999999909,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 99652,
+          "completed": 99652,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 1,
+          "running": 1,
+          "retainedBytes": 796
+        },
+        "final": {
+          "accepted": 122819,
+          "completed": 122819,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 1,
+              "name": "benchmark.echo",
+              "queueLimit": 128,
+              "queued": 0,
+              "running": 0,
+              "workers": 1
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 99652,
+          "finished": 99652,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 51,
+          "missingSamples": 0,
+          "rssPeakBytes": 2572288,
+          "cpuMs": 6440,
+          "averageCpuPercentOfOneCore": 64.2289796379544
+        },
+        "worker-1": {
+          "samples": 51,
+          "missingSamples": 0,
+          "rssPeakBytes": 65748992,
+          "cpuMs": 3830,
+          "averageCpuPercentOfOneCore": 38.198290685305174
+        },
+        "generator": {
+          "samples": 51,
+          "missingSamples": 0,
+          "rssPeakBytes": 67059712,
+          "cpuMs": 2130,
+          "averageCpuPercentOfOneCore": 21.24343581193212
+        },
+        "coordinator": {
+          "samples": 51,
+          "missingSamples": 0,
+          "rssPeakBytes": 27869184,
+          "cpuMs": 110,
+          "averageCpuPercentOfOneCore": 1.0970788447476683
+        }
+      },
+      "resourceWindowMs": 10026.626666500015,
+      "resourceBoundaryUncertaintyMs": 5.61870849999832,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 0.3134169999975711
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    },
+    {
+      "repetition": 3,
+      "scenario": "echo-c32",
+      "config": {
+        "payloadBytes": 256,
+        "handlerDelayMs": 0,
+        "queueLimit": 128,
+        "deadlineMs": 1000,
+        "name": "echo-c32",
+        "mode": "closed",
+        "replicas": 1,
+        "workerConcurrency": 32,
+        "concurrency": 32,
+        "connections": 1
+      },
+      "load": {
+        "mode": "closed",
+        "requestedDurationMs": 10000,
+        "attempts": 482887,
+        "successes": 482887,
+        "errorsByCode": {},
+        "durationMs": 9999.774375,
+        "drainMs": 0.423333000000639,
+        "successesPerSecond": 48287.74531264497,
+        "successesWithinWindow": 482855,
+        "successesWithinWindowPerSecond": 48286.589466174824,
+        "peakPending": 32,
+        "successLatencyMs": {
+          "count": 482887,
+          "min": 0.11349999999947613,
+          "mean": 0.6624348261891566,
+          "p50": 0.5971516335249868,
+          "p95": 1.0118530267983539,
+          "p99": 1.5215763880747553,
+          "max": 60.966915999999856,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "errorLatencyMs": {
+          "count": 0,
+          "min": null,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null,
+          "overflowCount": 0,
+          "trackableMaxMs": 60000,
+          "precision": {
+            "absoluteFloorMs": 0.01,
+            "relativeUpperBoundError": 0.01,
+            "percentileRepresentation": "nearest-rank bucket upper bound; null when empty or rank is above tracked range"
+          }
+        },
+        "scheduleLagMs": null,
+        "scheduledSuccessLatencyMs": null,
+        "scheduled": null,
+        "generatorDropped": 0,
+        "generatorDroppedByReason": {
+          "catchUpLimit": 0,
+          "pendingLimit": 0,
+          "windowExpired": 0,
+          "connectionUnavailable": 0
+        },
+        "cpuUsageMs": {
+          "user": 2395.103,
+          "system": 3757.954,
+          "total": 6153.057
+        },
+        "cpuCoresUsed": 0.6152935351545751,
+        "eventLoopDelayMs": {
+          "resolutionMs": 10,
+          "count": 992,
+          "mean": 10.065569032258065,
+          "p50": 10.002431,
+          "p95": 10.174463,
+          "p99": 12.009471,
+          "max": 29.622271
+        },
+        "memory": {
+          "before": {
+            "rss": 68501504,
+            "heapTotal": 14565376,
+            "heapUsed": 8903000,
+            "external": 3145698,
+            "arrayBuffers": 1125258
+          },
+          "after": {
+            "rss": 60227584,
+            "heapTotal": 34488320,
+            "heapUsed": 14033552,
+            "external": 4859890,
+            "arrayBuffers": 2839450
+          },
+          "peakRssBytesSampled": 78004224,
+          "peakHeapUsedBytesSampled": 19138648,
+          "sampleIntervalMs": 100
+        },
+        "correctness": {
+          "echoedBytesAndRequestIdsVerified": true,
+          "correlationFailures": 0,
+          "valid": true
+        },
+        "scheduler": {
+          "perConnectionPendingLimit": 32
+        },
+        "latencyOrigin": "client.request invocation, including local TCP queue; response payload and unique request ID verified",
+        "closedLoopLimitation": "Closed-loop demand waits for responses and has coordinated omission: latency cannot represent an independent fixed arrival rate.",
+        "config": {
+          "port": 64808,
+          "mode": "closed",
+          "durationMs": 10000,
+          "warmupMs": 2000,
+          "concurrency": 32,
+          "connections": 1,
+          "payloadBytes": 256,
+          "deadlineMs": 1000
+        },
+        "warmup": {
+          "attempts": 67574,
+          "successes": 67574,
+          "errorsByCode": {},
+          "durationMs": 2000.23425,
+          "drainMs": 0.55012499999998,
+          "generatorDropped": 0,
+          "generatorDroppedByReason": {
+            "catchUpLimit": 0,
+            "pendingLimit": 0,
+            "windowExpired": 0,
+            "connectionUnavailable": 0
+          },
+          "correctness": {
+            "echoedBytesAndRequestIdsVerified": true,
+            "correlationFailures": 0,
+            "valid": true
+          }
+        }
+      },
+      "broker": {
+        "counterDelta": {
+          "accepted": 482887,
+          "completed": 482887,
+          "rejected": 0,
+          "timedOut": 0
+        },
+        "sampledPeak": {
+          "queued": 19,
+          "running": 27,
+          "retainedBytes": 25472
+        },
+        "final": {
+          "accepted": 550461,
+          "completed": 550461,
+          "maxBytes": 16777216,
+          "maxCalls": 1024,
+          "queued": 0,
+          "rejected": 0,
+          "retainedBytes": 0,
+          "routes": [
+            {
+              "concurrency": 32,
+              "name": "benchmark.echo",
+              "queueLimit": 128,
+              "queued": 0,
+              "running": 0,
+              "workers": 1
+            }
+          ],
+          "running": 0,
+          "timedOut": 0
+        }
+      },
+      "workers": [
+        {
+          "active": 0,
+          "peak": 1,
+          "executed": 482887,
+          "finished": 482887,
+          "handlerErrors": 0,
+          "errors": []
+        }
+      ],
+      "resources": {
+        "broker": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 2621440,
+          "cpuMs": 27630,
+          "averageCpuPercentOfOneCore": 275.8737526374324
+        },
+        "worker-1": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 73547776,
+          "cpuMs": 7830,
+          "averageCpuPercentOfOneCore": 78.17920677347432
+        },
+        "generator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 78069760,
+          "cpuMs": 6150,
+          "averageCpuPercentOfOneCore": 61.40512409410819
+        },
+        "coordinator": {
+          "samples": 52,
+          "missingSamples": 0,
+          "rssPeakBytes": 26886144,
+          "cpuMs": 140,
+          "averageCpuPercentOfOneCore": 1.3978402232805116
+        }
+      },
+      "resourceWindowMs": 10015.450812500014,
+      "resourceBoundaryUncertaintyMs": 6.407437500020023,
+      "samplingIntervalMs": 200,
+      "sampleErrors": [],
+      "recoveryProbe": {
+        "passed": true,
+        "latencyMs": 0.31945800001267344
+      },
+      "validation": {
+        "passed": true,
+        "violations": []
+      }
+    }
+  ],
+  "validation": {
+    "passed": true
+  }
+}
