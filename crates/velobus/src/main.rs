@@ -288,6 +288,27 @@ struct Response {
     written: Option<oneshot::Sender<()>>,
 }
 
+async fn write_queued_response<W: AsyncWrite + Unpin>(
+    writer: &mut W,
+    ids: &Mutex<HashSet<u32>>,
+    mut response: Response,
+) -> Result<(), std::io::Error> {
+    // A peer can observe a TCP response before write_all returns on this thread.
+    // Retire the completed operation before making any response bytes visible, so
+    // replacing that operation (or reusing its ID) cannot spuriously hit the cap.
+    // The writer owns at most one response; queued responses still retain permits.
+    {
+        let mut live_ids = ids.lock().unwrap();
+        drop(response._permit.take());
+        live_ids.remove(&response.request_id);
+    }
+    write_response(writer, response.opcode, response.request_id, &response.body).await?;
+    if let Some(written) = response.written {
+        let _ = written.send(());
+    }
+    Ok(())
+}
+
 struct ConnectionCleanup {
     rpc: Arc<Rpc>,
     connection_id: u64,
@@ -350,17 +371,7 @@ async fn connection(
     let (responses_tx, mut responses_rx) = mpsc::channel::<Response>(1);
     let mut writer_task = tokio::spawn(async move {
         while let Some(response) = responses_rx.recv().await {
-            write_response(
-                &mut writer,
-                response.opcode,
-                response.request_id,
-                &response.body,
-            )
-            .await?;
-            writer_ids.lock().unwrap().remove(&response.request_id);
-            if let Some(written) = response.written {
-                let _ = written.send(());
-            }
+            write_queued_response(&mut writer, &writer_ids, response).await?;
         }
         Ok::<(), std::io::Error>(())
     });
@@ -506,6 +517,83 @@ async fn dispatch(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::pin::Pin;
+    use std::task::{Context, Poll};
+
+    struct ImmediateReplyObserver {
+        permits: Arc<Semaphore>,
+        ids: Arc<Mutex<HashSet<u32>>>,
+        id: u32,
+        replacement: Option<OwnedSemaphorePermit>,
+    }
+
+    impl AsyncWrite for ImmediateReplyObserver {
+        fn poll_write(
+            mut self: Pin<&mut Self>,
+            _cx: &mut Context<'_>,
+            bytes: &[u8],
+        ) -> Poll<std::io::Result<usize>> {
+            // A peer may receive the complete frame and send its next operation before
+            // the original write syscall returns to the server's writer task.
+            self.replacement = Some(
+                self.permits
+                    .clone()
+                    .try_acquire_owned()
+                    .expect("response became visible before its operation permit was released"),
+            );
+            assert!(
+                self.ids.lock().unwrap().insert(self.id),
+                "response became visible before its request identifier was released"
+            );
+            Poll::Ready(Ok(bytes.len()))
+        }
+        fn poll_flush(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<std::io::Result<()>> {
+            Poll::Ready(Ok(()))
+        }
+        fn poll_shutdown(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<std::io::Result<()>> {
+            Poll::Ready(Ok(()))
+        }
+    }
+
+    #[tokio::test]
+    async fn visible_reply_releases_admission_and_id_before_a_client_replenishes_32_operations() {
+        let permits = Arc::new(Semaphore::new(MAX_IN_FLIGHT));
+        let mut occupied = Vec::new();
+        for _ in 0..MAX_IN_FLIGHT - 1 {
+            occupied.push(permits.clone().try_acquire_owned().unwrap());
+        }
+        let response_permit = permits.clone().try_acquire_owned().unwrap();
+        let ids = Arc::new(Mutex::new(
+            (1..=MAX_IN_FLIGHT as u32).collect::<HashSet<_>>(),
+        ));
+        let mut writer = ImmediateReplyObserver {
+            permits: permits.clone(),
+            ids: ids.clone(),
+            id: MAX_IN_FLIGHT as u32,
+            replacement: None,
+        };
+        assert_eq!(permits.available_permits(), 0);
+        write_queued_response(
+            &mut writer,
+            &ids,
+            Response {
+                opcode: 133,
+                request_id: MAX_IN_FLIGHT as u32,
+                body: Vec::new(),
+                _permit: Some(response_permit),
+                written: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert!(writer.replacement.is_some());
+        assert_eq!(permits.available_permits(), 0);
+        assert_eq!(ids.lock().unwrap().len(), MAX_IN_FLIGHT);
+        assert!(
+            ids.lock().unwrap().contains(&(MAX_IN_FLIGHT as u32)),
+            "writer erased a newly reused request ID"
+        );
+    }
 
     #[test]
     fn defaults_and_cli_validation() {

@@ -4,7 +4,7 @@ Executada localmente em 9 de setembro de 2026, macOS ARM64 / Apple M2.
 
 | Verificação | Resultado |
 |---|---|
-| Rust: RPC, transporte, protocolo de eventos, limites e WAL | 24 testes passaram |
+| Rust: RPC, transporte, protocolo de eventos, limites e WAL | 25 testes passaram |
 | SDK: RPC, handlers, cancelamento, framing e eventos | 48 testes passaram |
 | Integração por TCP e API HTTP real | 29 testes passaram |
 | `cargo clippy --workspace --all-targets -- -D warnings` | Passou |
@@ -13,7 +13,9 @@ Executada localmente em 9 de setembro de 2026, macOS ARM64 / Apple M2.
 | Instalação do pacote npm em projeto separado, ESM e CommonJS | Passou |
 | Request/reply com o pacote instalado | Passou |
 
-Total: **101 testes**, além do teste de instalação e do ensaio de sobrecarga.
+Total: **102 testes**, além do teste de instalação e do ensaio de sobrecarga.
+
+Um teste de regressão reproduz um cliente que recebe a resposta e imediatamente repõe uma das 32 operações da conexão. A vaga e o identificador agora são liberados antes de tornar a resposta visível; a ordem anterior podia rejeitar esse cliente indevidamente e desconectar um worker do SDK sob carga. A saída permanece limitada. O teste falhou com a ordem antiga e passou com a correção.
 
 A integração cobre proteção de concorrência e fila, expiração antes do despacho, preservação de capacidade durante handlers atrasados, desconexões, réplicas sem broadcast, 32 slots simultâneos, erros de serviço e HTTP 200/503/504. O núcleo de eventos também continua validado, inclusive recuperação de lote confirmado após SIGKILL, falhas de escrita, limites de capacidade e corrupção do WAL. SIGKILL não simula corte de energia.
 
