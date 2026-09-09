@@ -43,7 +43,7 @@ impl Config {
     fn parse(args: impl IntoIterator<Item = String>, token: String) -> Result<Self, String> {
         let mut config = Self {
             listen: "127.0.0.1:7447".parse().unwrap(),
-            data_dir: "./data/velobus".into(),
+            data_dir: "./data/nodara".into(),
             memory: false,
             max_retained_bytes: 64 * 1024 * 1024,
             max_wal_bytes: 128 * 1024 * 1024,
@@ -98,10 +98,10 @@ impl Config {
             return Err("--memory conflicts with --data-dir".into());
         }
         if !config.listen.ip().is_loopback() && config.token.is_empty() {
-            return Err("VELOBUS_TOKEN is required for a non-loopback listener".into());
+            return Err("NODARA_TOKEN is required for a non-loopback listener".into());
         }
         if config.token.len() > u16::MAX as usize {
-            return Err("VELOBUS_TOKEN exceeds protocol limit".into());
+            return Err("NODARA_TOKEN exceeds protocol limit".into());
         }
         Ok(config)
     }
@@ -119,7 +119,7 @@ fn parse_budget(value: &str, minimum: u64) -> Result<u64, String> {
 }
 
 fn help() {
-    println!("VeloBus {} — experimental single-node request/reply intermediary\n\nUsage: velobus [options]\n  --listen IP:PORT             Default 127.0.0.1:7447; port 0 selects a free port\n  --data-dir PATH              Default ./data/velobus; durable checksummed WAL\n  --memory                    Explicit volatile mode (conflicts with --data-dir)\n  --max-retained-bytes N       Default 67108864; no silent eviction\n  --max-wal-bytes N            Default 134217728\n  --max-connections N          Default 64, range 1..4096\n  --max-rpc-calls N            Default 1024 waiting/running calls\n  --max-rpc-bytes N            Default 16777216 accounted RPC bytes\n  --help                      Show this help\n  --version                   Show version\n\nVELOBUS_TOKEN: optional on loopback; required otherwise.\nNo TLS: use a trusted network or encrypted tunnel for remote access.\nMemory history and sequence numbers reset when the process restarts.", env!("CARGO_PKG_VERSION"));
+    println!("Nodara {} — experimental single-node request/reply intermediary\n\nUsage: nodara [options]\n  --listen IP:PORT             Default 127.0.0.1:7447; port 0 selects a free port\n  --data-dir PATH              Default ./data/nodara; durable checksummed WAL\n  --memory                    Explicit volatile mode (conflicts with --data-dir)\n  --max-retained-bytes N       Default 67108864; no silent eviction\n  --max-wal-bytes N            Default 134217728\n  --max-connections N          Default 64, range 1..4096\n  --max-rpc-calls N            Default 1024 waiting/running calls\n  --max-rpc-bytes N            Default 16777216 accounted RPC bytes\n  --help                      Show this help\n  --version                   Show version\n\nNODARA_TOKEN: optional on loopback; required otherwise.\nNo TLS: use a trusted network or encrypted tunnel for remote access.\nMemory history and sequence numbers reset when the process restarts.", env!("CARGO_PKG_VERSION"));
 }
 
 #[tokio::main]
@@ -130,26 +130,26 @@ async fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("velobus {}", env!("CARGO_PKG_VERSION"));
+        println!("nodara {}", env!("CARGO_PKG_VERSION"));
         return;
     }
-    let token = match std::env::var("VELOBUS_TOKEN") {
+    let token = match std::env::var("NODARA_TOKEN") {
         Ok(token) => token,
         Err(std::env::VarError::NotPresent) => String::new(),
         Err(_) => {
-            eprintln!("velobus: VELOBUS_TOKEN must be valid UTF-8");
+            eprintln!("nodara: NODARA_TOKEN must be valid UTF-8");
             std::process::exit(1);
         }
     };
     match Config::parse(args, token) {
         Ok(config) => {
             if let Err(error) = serve(config).await {
-                eprintln!("velobus: {error}");
+                eprintln!("nodara: {error}");
                 std::process::exit(1);
             }
         }
         Err(error) => {
-            eprintln!("velobus: {error}; use --help");
+            eprintln!("nodara: {error}; use --help");
             std::process::exit(1);
         }
     }

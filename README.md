@@ -1,132 +1,103 @@
-# VeloBus
+# Nodara
 
-Intermediário experimental entre **APIs e microsserviços**, com núcleo Rust e cliente TypeScript/Node.js. Uma API envia uma requisição para uma rota, o VeloBus a entrega a um worker disponível e devolve a resposta ao solicitante. Filas limitadas, concorrência declarada e prazos impedem que a espera cresça sem controle dentro do broker.
+Intermediário experimental para APIs e microsserviços: **broker Rust + biblioteca Node.js/TypeScript**, com request/reply, limites de carga e suporte a múltiplos brokers. Nome anterior: VeloBus; o repositório Git mantém seu endereço original.
 
-O foco da v0.2 é **request/reply**. A aplicação faz `await` até receber a resposta ou um erro; a comunicação usa I/O assíncrona e não bloqueia o event loop Node.js. Cada chamada é entregue a no máximo um worker. Não é broadcast.
+A v0.3 distribui chamadas entre até oito brokers independentes. Se um nó cair, novas chamadas podem seguir pelos restantes; o SDK reconecta e registra seus workers quando ele retorna. **Chamadas em andamento e filas não são replicadas.** Uma resposta perdida pode deixar o resultado incerto; operações não são repetidas automaticamente nessas condições.
 
-Versão experimental de um único nó. Raspberry Pi 5 com Linux de 64 bits é um alvo de avaliação; desempenho nesse hardware ainda precisa ser medido. O nome é provisório e `@velobus/client` ainda não foi publicado no registro npm.
+## Instalação
 
-## Começar
+```sh
+npm install nodara
+```
 
-Requisitos: Rust/Cargo estável e Node.js 20 ou superior.
+Node.js 20+, ESM/CommonJS, tipos TypeScript e nenhuma dependência de execução. O pacote npm contém o cliente; o broker Rust roda separadamente. Licença MIT.
+
+Para compilar o broker a partir deste repositório:
 
 ```sh
 npm run setup
 npm run build
-npm start
+./target/release/nodara --memory --listen 127.0.0.1:7447
 ```
 
-O broker escuta em `127.0.0.1:7447`. Para desenvolvimento sem o WAL de eventos, use `npm run dev`. **RPC é volátil nos dois modos:** habilitar o WAL não torna chamadas request/reply persistentes.
+Em outros terminais/hosts, inicie mais brokers, por exemplo nas portas 7448 e 7449. Cada broker em modo disco exige diretório de dados próprio. Fora de loopback, configure `NODARA_TOKEN` e proteja o transporte externamente; não há TLS nativo.
 
-Com o broker rodando, em outro terminal:
-
-```sh
-npm run example
-# Demonstra uma API HTTP e duas instâncias do serviço users.get:
-npm run example:http
-# Em um terceiro terminal:
-curl http://127.0.0.1:8080/users/42
-```
-
-O exemplo HTTP limita chamadas ao backend e traduz sobrecarga em HTTP 503 e prazo esgotado em HTTP 504. Os dois workers do exemplo compartilham um processo Node para facilitar a execução; em produção, podem estar em processos/servidores separados. Para adaptar uma API HTTP existente, um handler pode chamar `fetch(url, { signal: context.signal })` dentro da concorrência declarada.
-
-O cliente é um pacote npm comum, com ESM, CommonJS e tipos TypeScript, sem dependências de execução ou addon nativo. O servidor Rust é executado separadamente. Enquanto o pacote não estiver publicado:
-
-```sh
-npm install /caminho/para/velobus/packages/client
-```
-
-## Registrar um microsserviço
-
-O SDK usa uma conexão autenticada dedicada para cada worker registrado.
+## Worker com múltiplos brokers
 
 ```js
-import { connect } from '@velobus/client';
+import { connectCluster } from 'nodara';
 
-const bus = await connect();
-const service = await bus.handleJSON(
-  'users.get',
-  async ({ id }, context) => {
-    // Exemplo: substitua pelo acesso ao seu banco ou serviço.
-    // Encaminhe context.signal a operações que aceitam cancelamento.
-    return { id, name: 'Ana' };
-  },
-  { concurrency: 8, queueLimit: 128 },
-);
+const bus = await connectCluster({
+  brokers: [
+    { id: 'a', host: '127.0.0.1', port: 7447 },
+    { id: 'b', host: '127.0.0.1', port: 7448 },
+    { id: 'c', host: '127.0.0.1', port: 7449 },
+  ],
+  // token: process.env.NODARA_TOKEN,
+});
 
+const service = await bus.handleJSON('users.get', async ({ id }, context) => {
+  // Integre seu backend e encaminhe context.signal a operações canceláveis.
+  return { id, name: 'Ana' };
+}, { concurrency: 8, queueLimit: 128 });
+
+console.log(service.nodes());
 // No encerramento: await service.close(); await bus.close();
 ```
 
-Outros processos podem registrar a mesma rota. Cada worker respeita sua concorrência; todos devem usar o mesmo `queueLimit`, que limita a fila compartilhada de espera da rota. O padrão é 8 execuções simultâneas por worker; o SDK limita a configuração a 32.
+`concurrency: 8` limita os handlers desse serviço a oito execuções simultâneas **nesse processo**, somando todos os brokers e preservando vagas de handlers antigos durante reconexões. `queueLimit` é por rota em cada broker. A espera local pelos handlers também é limitada e consome o prazo da chamada. Veja o [contrato completo de capacidade](docs/CLUSTER.md).
 
-## Chamar a partir de uma API
+## Chamada a partir de outra API
+
+Crie um `connectCluster()` com a mesma lista e reutilize-o:
 
 ```js
-import { connect } from '@velobus/client';
-
-const bus = await connect();
-const user = await bus.requestJSON(
-  'users.get',
-  { id: 'U-1024' },
-  { timeoutMs: 2000 },
-);
-
+const user = await bus.requestJSON('users.get', { id: 'U-1024' }, { timeoutMs: 1500 });
 console.log(user);
-// Reutilize bus; feche a conexão no encerramento da aplicação.
+console.log(bus.nodes());
 ```
 
-Também há `request` e `handle` para payloads binários ou texto. Navegadores acessam sua API HTTP; o SDK TCP roda no backend. O broker não transforma endpoints HTTP existentes em workers automaticamente: a aplicação registra handlers e faz chamadas pelo cliente.
+A aplicação usa `await`; o SDK não bloqueia o event loop. Cada tentativa aceita é entregue a um worker. O balanceamento usa pendências locais e alterna empates; não mede a CPU global de todos os brokers. Uma rejeição explícita antes do despacho pode ser tentada em outro nó dentro do mesmo prazo.
 
-## Sobrecarga, prazo e falhas
+Para um único broker, `connect({ host, port, token })` continua disponível, incluindo eventos. CommonJS: `const { connectCluster } = require('nodara')`.
 
-- **Fila cheia ou orçamento global esgotado:** `OVERLOADED` rapidamente; uma API HTTP pode responder 503.
-- **Nenhum worker para a rota:** `NO_SERVICE`. Se o último worker desconectar, a fila pendente falha.
-- **Prazo esgotado:** `DEADLINE_EXCEEDED`, incluindo espera na fila e execução; uma API HTTP pode responder 504. Um pedido expirado na fila não deve começar.
-- **Handler já iniciado:** timeout não desfaz efeitos externos. O SDK sinaliza cancelamento cooperativo e só libera a vaga quando o handler termina ou o worker desconecta. Código que ignora o sinal pode continuar.
-- **Worker desconectado:** chamadas ativas recebem `SERVICE_UNAVAILABLE`, sem repetição automática. Desconectar não prova que efeitos externos tenham sido interrompidos.
+## Falhas e garantias
 
-O prazo padrão é 5 segundos, configurável de 1 ms a 30 segundos. O timeout de transporte inclui uma margem além do prazo RPC. Erros normais de serviço preservam a conexão do chamador; falhas de transporte podem deixar o resultado de uma operação incerto. Use identificadores de negócio e idempotência quando a aplicação decidir repetir chamadas.
+| Resultado | Comportamento |
+| --- | --- |
+| Nó desconectado | Retirado da seleção; reconexão com recuo limitado |
+| `NO_SERVICE` / `OVERLOADED` antes do despacho | Pode tentar outro nó, no máximo uma vez por nó e dentro do prazo original |
+| `AmbiguousResultError` | A chamada pode ter executado; não é repetida automaticamente |
+| Prazo esgotado ou erro do handler | Devolvido à API, sem replay em outro broker |
+| Todos os nós indisponíveis | Falha explícita, sem aceitar trabalho em fila ilimitada |
+| Broker recuperado | Conexão e registros de workers restaurados; chamadas antigas não são restauradas |
 
-## Limites e operação
+Timeout/cancelamento não desfaz efeitos externos. Pedidos e pagamentos precisam de idempotência e reconciliação duráveis na aplicação. Nós no mesmo host compartilham a falha desse host. O pool não oferece consenso, replicação, descoberta automática, cotas globais entre processos ou certificação de alta disponibilidade.
 
-```sh
-./target/release/velobus \
-  --listen 127.0.0.1:7447 \
-  --max-connections 64 \
-  --max-rpc-calls 1024 \
-  --max-rpc-bytes 16777216
-```
+## Eventos
 
-O orçamento RPC inclui chamadas em espera e execução. Trabalho já iniciado continua ocupando capacidade até terminar ou perder seu worker, mesmo se o solicitante desistir. `stats().rpc` mostra filas, execuções e contadores por rota. Os orçamentos internos de bytes não limitam todo o RSS do processo.
+`connect()` mantém `publish`, `publishBatch`, `fetch` e `subscribe`. Cada nó tem seu próprio histórico, sequência e WAL. O pool não mistura eventos entre nós. O ACK de evento no modo disco confirma sincronização do WAL local, não processamento pelo consumidor. RPC continua volátil mesmo quando o WAL está habilitado.
 
-Use `VELOBUS_TOKEN` para autenticação; ele é obrigatório fora de loopback. TCP com token não oferece criptografia, portanto acesso remoto requer transporte protegido externamente. Não há TLS embutido, alta disponibilidade, replicação, replay automático, circuit breaker, limite por segundo ou escalonamento automático nesta versão.
+`latest` combina estados da mesma chave durante uma busca limitada e só é adequado quando estados intermediários podem ser omitidos. Não combina chamadas RPC.
 
-## Eventos como recurso complementar
-
-`publish`, `publishBatch`, `fetch` e `subscribe` continuam disponíveis. Em disco, o ACK de publicação significa sincronização do lote no WAL local, sujeito ao sistema de arquivos e ao armazenamento. Não confirma processamento por consumidores e não se aplica a chamadas RPC.
-
-O histórico de eventos é limitado, mantido em memória e reconstruído do WAL. Capacidade esgotada rejeita publicações sem expulsão silenciosa. Não há retenção automática nem consumidores duráveis no servidor. Checkpoints pertencem ao mesmo histórico e assinatura; recriar o WAL ou reiniciar o modo volátil invalida os anteriores.
-
-`latest` combina estados da mesma combinação de tópico e chave dentro de uma busca limitada, preservando o histórico. Só use quando a assinatura aceita omitir estados intermediários. **Chamadas RPC nunca são combinadas por `latest`.**
-
-## Validar e medir
+## Exemplos, testes e documentação
 
 ```sh
 npm test
 npm run build
 npm run test:package
-npm run pack:client
-npm run load:rpc
 npm run test:benchmark
-npm run benchmark:rpc -- --output docs/benchmarks/local-rpc.json
+npm run example:cluster
+npm run example:http
 ```
 
-Os scripts usam `work/` para temporários; `VELOBUS_WORK_DIR` permite outro diretório. O pacote instalável é gerado em `artifacts/`.
+`example:cluster` inicia três brokers locais, encerra um e demonstra atendimento pelos restantes. Os testes de cluster exercitam queda durante execução, ausência de replay, limite compartilhado, autenticação e recuperação.
 
-O [benchmark RPC](docs/RPC-BENCHMARKS.md) mede respostas completas, latências, rejeições e recursos com processos separados, aquecimento e repetições. O comando completo demora alguns minutos e usa o binário release. A checagem `test:benchmark` é curta e valida o instrumento, sem exigir uma meta de desempenho em CI. Os benchmarks de eventos em [BENCHMARKS.md](docs/BENCHMARKS.md) não demonstram capacidade request/reply. Não há alegação de vantagem universal sobre outros intermediários.
+O [benchmark histórico v0.2](docs/RPC-BENCHMARKS.md) mediu 48,3 mil respostas/s de mediana com payload de 256 B e 32 chamadas simultâneas no Apple M2. **Ele não mede o novo pool, Raspberry Pi ou tráfego de produção.** Não há comparação de superioridade sobre outros brokers.
 
-Referência local no Apple M2: com payload de 256 B e 32 chamadas simultâneas, a mediana de três execuções foi **48,3 mil respostas/s**, com **p99 mediano de 1,52 ms**. Cada execução teve 2 s de aquecimento e 10 s de admissão. O relatório inclui variação, rejeições, pausas do gerador e CPU/memória de cada processo. Esses números não foram medidos no Raspberry Pi.
+- [Múltiplos brokers e garantias](docs/CLUSTER.md)
+- [Guia completo para LLMs](LLM.txt) e [índice llms.txt](llms.txt)
+- [SDK](packages/client/README.md), [protocolo RPC](docs/RPC-PROTOCOL.md) e [eventos](docs/PROTOCOL.md)
+- [Propostas de features](docs/FEATURES.md) e [validação](docs/VALIDATION.md)
 
-As [novas propostas de features](docs/FEATURES.md) priorizam métricas por fase, cotas justas, encerramento gradual e integração tipada.
-
-Detalhes: [request/reply](docs/RPC-PROTOCOL.md), [eventos](docs/PROTOCOL.md), [arquitetura](docs/ARCHITECTURE.md), [roteiro](docs/ROADMAP.md), [cliente](packages/client/README.md).
+Migração do nome anterior: pacote `nodara`, binário `nodara`, variáveis `NODARA_TOKEN`, `NODARA_HOST`, `NODARA_PORT`, `NODARA_BIN` e `NODARA_WORK_DIR`. O diretório padrão passa a `./data/nodara`; para usar um WAL existente, informe seu diretório explicitamente com `--data-dir`.

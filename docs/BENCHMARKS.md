@@ -1,3 +1,5 @@
+> Registro histórico anterior à renomeação para Nodara. Binários, variáveis e resultados abaixo pertencem à versão indicada. Na árvore atual, use `nodara` e o prefixo `NODARA_`; não atribua estas medições ao pool v0.3.
+
 # Primeiras medições locais
 
 Estes números são históricos do núcleo de **eventos v0.1**. Não medem a nova comunicação request/reply de APIs. O ensaio de controle de sobrecarga RPC fica em [RPC-VALIDATION.md](RPC-VALIDATION.md).

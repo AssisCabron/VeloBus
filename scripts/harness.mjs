@@ -5,20 +5,20 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-export const workRoot = resolve(process.env.VELOBUS_WORK_DIR ?? join(root, 'work'));
+export const workRoot = resolve(process.env.NODARA_WORK_DIR ?? join(root, 'work'));
 export const scratch = join(workRoot, 'validation');
 
-export async function temporaryDirectory(prefix = 'velobus-') {
+export async function temporaryDirectory(prefix = 'nodara-') {
   await mkdir(scratch, { recursive: true });
   return mkdtemp(join(scratch, prefix));
 }
 
 export async function startBroker({ dataDir, args = [], token, binary } = {}) {
-  const executable = binary ?? process.env.VELOBUS_BIN ?? join(root, 'target', 'debug', 'velobus');
+  const executable = binary ?? process.env.NODARA_BIN ?? join(root, 'target', 'debug', 'nodara');
   if (!existsSync(executable)) throw new Error(`Compile primeiro: cargo build. Binário ausente: ${executable}`);
   const env = { ...process.env };
-  delete env.VELOBUS_TOKEN;
-  if (token !== undefined) env.VELOBUS_TOKEN = token;
+  delete env.NODARA_TOKEN;
+  if (token !== undefined) env.NODARA_TOKEN = token;
   const child = spawn(executable, ['--listen', '127.0.0.1:0', ...(dataDir ? ['--data-dir', dataDir] : ['--memory']), ...args], {
     cwd: root, env, stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -69,6 +69,6 @@ export async function startBroker({ dataDir, args = [], token, binary } = {}) {
 
 export async function removeTemporaryDirectory(path) {
   // Only directories created under our dedicated scratch location may be removed.
-  if (!resolve(path).startsWith(`${scratch}/velobus-`)) throw new Error('Diretório temporário fora do escopo');
+  if (!resolve(path).startsWith(`${scratch}/nodara-`)) throw new Error('Diretório temporário fora do escopo');
   await rm(path, { recursive: true, force: true });
 }

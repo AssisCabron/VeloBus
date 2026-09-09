@@ -1,0 +1,165 @@
+# Nodara 0.3 — integration guide for coding agents
+
+Nodara is an experimental RPC intermediary for backend APIs and microservices.
+Install the Node.js SDK with `npm install nodara`. It supports Node 20+, ESM,
+CommonJS and TypeScript, with no runtime dependencies. License: MIT.
+The Rust broker is a separate process. The npm package does not contain or
+launch a native broker. The project was previously called VeloBus; its GitHub
+repository remains https://github.com/AssisCabron/VeloBus .
+
+## Start the infrastructure
+
+From a clone of the repository:
+
+    npm run setup
+    npm run build
+    ./target/release/nodara --memory --listen 127.0.0.1:7447
+
+Start additional brokers in separate terminals/processes, e.g. ports 7448 and
+7449. For different machines, use their real protected network addresses and
+configure NODARA_TOKEN on every broker. Tokens authenticate but do not encrypt
+TCP; provide transport encryption externally. There are no built-in route ACLs.
+Each disk-mode broker needs a separate --data-dir. RPC stays volatile in disk
+mode: the WAL stores events, not RPC jobs.
+
+## Multi-broker caller
+
+```js
+import { connectCluster, AmbiguousResultError, BrokerError } from 'nodara';
+
+const bus = await connectCluster({
+  brokers: [
+    { id: 'a', host: '127.0.0.1', port: 7447 },
+    { id: 'b', host: '127.0.0.1', port: 7448 },
+  ],
+  // token: process.env.NODARA_TOKEN,
+  timeoutMs: 1000,
+  healthIntervalMs: 500,
+  reconnectMinMs: 100,
+  reconnectMaxMs: 5000,
+  maxPendingRequests: 256,
+});
+
+try {
+  const user = await bus.requestJSON('users.get', { id: 'U-42' }, { timeoutMs: 1500 });
+  console.log(user);
+} catch (error) {
+  if (error instanceof AmbiguousResultError) {
+    // Outcome may include a completed side effect. Reconcile by business ID.
+    console.error(error.brokerId, error.outcome); // 'unknown'
+  } else if (error instanceof BrokerError) {
+    console.error(error.code, error.message);
+  } else throw error;
+}
+// On application shutdown: await bus.close();
+```
+
+Create one reusable pool per application purpose. Do not connect/close per HTTP
+request. Pool endpoints are explicit, unique, and limited to 1–8. Endpoint
+fields: {id?, host, port?, token?}; default port 7447. Endpoint token overrides
+the common token. Startup requires at least one authenticated, reachable node.
+Do not put server tokens into browser bundles; the TCP SDK runs in the backend.
+
+## Worker, normally in a different process
+
+Create a pool with the same broker list, then register:
+
+```js
+const service = await bus.handleJSON('users.get', async ({ id }, context) => {
+  // Validate untrusted input. Replace with your application logic.
+  // Forward context.signal to cancellable database/HTTP operations.
+  return { id, name: 'Ana' };
+}, {
+  concurrency: 8,
+  queueLimit: 128,
+  onError(error) { console.error('Worker transport error:', error.message); },
+});
+console.log(service.nodes()); // brokers currently holding this registration
+// Shutdown: await service.close(); await bus.close();
+```
+
+handleJSON<Input, Output> and requestJSON<Output> support TypeScript generics;
+they do not perform schema validation. JSON must be serializable (no BigInt).
+Binary API: handle(route, request => request.payload) and
+request(route, Uint8Array|string, {timeoutMs?}). RpcResponse exposes payload
+(Buffer), text(), json<T>(). RpcRequest also exposes signal and remainingMs.
+
+## Capacity and load balancing
+
+The pool picks the connected node with the fewest LOCAL pending operations and
+rotates ties. This is not global CPU/queue-aware broker scheduling. It has at
+most 32 transport operations per broker connection (including health probes)
+and at most maxPendingRequests user calls across the pool (default/max 256).
+Overload rejects explicitly; do not add an unbounded queue or tight retry loop.
+
+For cluster workers, concurrency (default 8, range 1–32) bounds actual handlers
+for that registration in THIS Node process across all brokers. Reconnects do
+not reset the shared gate. A handler that ignores cancellation retains its
+slot until it settles. Broker-assigned calls awaiting that gate are bounded
+by broker count × concurrency, consume their remaining deadline, and appear
+as running in the broker. queueLimit (default 128, range 1–4096) applies to
+each broker's route queue. Replicas on one broker must agree on queueLimit.
+Different processes have independent limits. There are no global tenant quotas.
+
+## Failure semantics — preserve these contracts
+
+- Failed nodes are removed once detected; subsequent calls use surviving nodes.
+  The first request during an undetected failure can still fail.
+- Background health probes and bounded jittered exponential reconnect restore
+  connections and re-register active workers. nodes() exposes connection state,
+  local pending counts and last errors, without tokens.
+- Only explicit NO_SERVICE (8), OVERLOADED (9), or local pre-send backpressure
+  can select another broker. Each node is attempted at most once, consuming the
+  original deadline budget; no delay/retry loop across every node repeatedly.
+- After a transport/protocol failure during a call, AmbiguousResultError carries
+  brokerId and outcome='unknown'. Never automatically replay that call.
+- ClusterUnavailableError means no node accepted the call. BackpressureError
+  means local capacity was exhausted. Do not hide these as successful results.
+- BrokerError 10 (deadline), 11 (service unavailable), and 12 (handler error)
+  are returned without retry. A timeout does not prove no side effect occurred.
+- Deadline defaults to 5000ms, configurable 1–30000ms. It includes broker queue,
+  local handler admission and execution. Transport failure detection can take
+  longer than this broker-side deadline. Cancellation is cooperative.
+- There is NO consensus, replicated RPC queue, durable replay, automatic broker
+  discovery, or exactly-once business guarantee. A failed node can lose its
+  in-flight calls. Surviving nodes preserve service availability, not those calls.
+- For orders/payments, implement durable idempotency and reconciliation in the
+  application. Do not treat generic retries or an in-memory cache as sufficient.
+- close() stops intake and signals cancellation. It does not wait for a handler
+  that ignores cancellation; service.close() is not graceful draining.
+
+## Single broker and events
+
+```js
+import { connect } from 'nodara';
+const node = await connect({ host: '127.0.0.1', port: 7447 });
+await node.ping();
+console.log(await node.stats());
+await node.close();
+```
+
+CommonJS works: `const { connect, connectCluster } = require('nodara')`.
+Single-node clients also support publish, publishJSON, publishBatch, fetch and
+subscribe. Events have node-local sequences/cursors; disk ACK means local WAL
+sync, not consumer execution. The cluster pool deliberately does not expose
+event APIs because independent histories are not interchangeable. latest fetch
+coalescing is opt-in for replaceable states, never an RPC deduplication feature.
+
+## Validation and scope
+
+Repository commands: npm test; npm run build; npm run test:package;
+npm run test:benchmark; npm run example:cluster.
+The cluster integration tests terminate a broker with SIGKILL, restore the same
+endpoint, test handler registration, shared concurrency, safe rejection retries,
+ambiguous outcomes without replay, credentials and shutdown.
+Historical 48k RPC/s measurements describe the previous single-broker v0.2 on
+Apple M2. Do not claim this number for the new pool, a Raspberry Pi, business
+transactions, a WAN, or production SLOs. Do not claim zero-loss failover.
+
+## Documentation
+
+- https://github.com/AssisCabron/VeloBus/blob/main/docs/CLUSTER.md
+- https://github.com/AssisCabron/VeloBus/blob/main/docs/RPC-PROTOCOL.md
+- https://github.com/AssisCabron/VeloBus/blob/main/docs/PROTOCOL.md
+- https://github.com/AssisCabron/VeloBus/blob/main/docs/RPC-BENCHMARKS.md
+- https://github.com/AssisCabron/VeloBus/blob/main/packages/client/README.md

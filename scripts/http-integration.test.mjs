@@ -11,7 +11,7 @@ async function fixture(t, { workerOptions, timeoutMs } = {}) {
   return { worker, gateway };
 }
 
-test('HTTP API -> VeloBus -> microserviço -> resposta JSON', async t => {
+test('HTTP API -> Nodara -> microserviço -> resposta JSON', async t => {
   const { gateway } = await fixture(t);
   const response = await fetch(`${gateway.url}/users/42`);
   assert.equal(response.status, 200); assert.equal((await response.json()).id, '42');

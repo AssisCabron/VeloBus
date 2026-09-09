@@ -1,3 +1,5 @@
+> Registro histórico anterior à renomeação para Nodara. Binários, variáveis e resultados abaixo pertencem à versão indicada. Na árvore atual, use `nodara` e o prefixo `NODARA_`; não atribua estas medições ao pool v0.3.
+
 # Validação de comunicação entre APIs — v0.2
 
 Executada em 9 de setembro de 2026 no Mac Apple M2, com broker Rust e cliente Node v26.7.0 por TCP loopback. O objetivo deste ensaio é verificar **controle de sobrecarga e encaminhamento exclusivo**, não estimar capacidade máxima ou comparar com outros produtos.

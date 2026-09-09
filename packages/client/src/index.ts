@@ -116,12 +116,12 @@ export class BrokerError extends Error {
   constructor(public readonly code: number, message: string) { super(message); this.name = 'BrokerError'; }
 }
 export class ConnectionClosedError extends Error {
-  constructor(message = 'VeloBus connection is closed; unfinished operations may have an unknown outcome') {
+  constructor(message = 'Nodara connection is closed; unfinished operations may have an unknown outcome') {
     super(message); this.name = 'ConnectionClosedError';
   }
 }
 export class RequestTimeoutError extends Error {
-  constructor(message = 'VeloBus transport request timed out; connection closed and operation outcome may be unknown') {
+  constructor(message = 'Nodara transport request timed out; connection closed and operation outcome may be unknown') {
     super(message); this.name = 'RequestTimeoutError';
   }
 }
@@ -138,6 +138,17 @@ interface Pending {
 }
 
 export class Client {
+  /** Transport state; false is not a guarantee that the next network operation will succeed. */
+  get isClosed(): boolean { return this.closed; }
+
+  onDisconnect(listener: (error: Error) => void): () => void {
+    if (typeof listener !== 'function') throw new TypeError('listener must be a function');
+    let active = true;
+    const observer = (error: Error) => { if (active) { try { listener(error); } catch (failure) { process.emitWarning(asError(failure)); } } };
+    if (this.closed) queueMicrotask(() => observer(this.closeReason));
+    else this.failureObservers.add(observer);
+    return () => { active = false; this.failureObservers.delete(observer); };
+  }
   private readonly pending = new Map<number, Pending>();
   private readonly writeQueue: Buffer[] = [];
   private blocked = false;
@@ -167,7 +178,7 @@ export class Client {
       catch (error) { this.fail(asError(error)); }
     });
     socket.on('error', error => this.fail(error));
-    socket.on('end', () => this.fail(new ConnectionClosedError('VeloBus peer ended the connection; publication outcome may be unknown')));
+    socket.on('end', () => this.fail(new ConnectionClosedError('Nodara peer ended the connection; publication outcome may be unknown')));
     socket.on('close', () => { this.fail(this.closeReason); this.resolveClose(); });
     socket.on('drain', () => { this.blocked = false; this.flush(); });
   }
@@ -190,7 +201,7 @@ export class Client {
     onCreated?.(client);
     try {
       await new Promise<void>((resolve, reject) => {
-        const timer = setTimeout(() => client.fail(new RequestTimeoutError('VeloBus connection establishment timed out')), timeoutMs);
+        const timer = setTimeout(() => client.fail(new RequestTimeoutError('Nodara connection establishment timed out')), timeoutMs);
         client.rejectConnect = reason => { clearTimeout(timer); reject(reason); };
         socket.once('connect', () => {
           clearTimeout(timer);
@@ -271,7 +282,7 @@ export class Client {
         child.failureObservers.delete(onFailure);
         for (const [controller, timer] of active) {
           clearTimeout(timer);
-          controller.abort(new ConnectionClosedError('VeloBus service closed'));
+          controller.abort(new ConnectionClosedError('Nodara service closed'));
         }
         active.clear();
         closing = child.close();
@@ -645,6 +656,9 @@ function abortable<T>(promise: Promise<T>, signal?: AbortSignal): Promise<T> {
     promise.then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort));
   });
 }
+
+export { connectCluster, ClusterClient, ClusterUnavailableError, AmbiguousResultError } from './cluster.js';
+export type { BrokerEndpoint, ClusterOptions, ClusterNodeStatus, ClusterServiceHandle } from './cluster.js';
 function pause(ms: number, signal?: AbortSignal): Promise<void> {
   throwIfAborted(signal);
   return new Promise((resolve, reject) => {

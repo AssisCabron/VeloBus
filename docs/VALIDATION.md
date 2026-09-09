@@ -1,3 +1,26 @@
+# Validação do Nodara v0.3
+
+Executada localmente em 9 de setembro de 2026, macOS ARM64 / Apple M2.
+
+| Verificação | Resultado |
+| --- | --- |
+| Rust: protocolo, RPC, transporte e WAL | 25 testes passaram |
+| SDK: API e protocolo | 48 testes passaram |
+| Integração TCP, HTTP e múltiplos brokers | 44 testes passaram |
+| Instrumento de benchmark | 15 testes passaram |
+| Pacote instalado em projeto separado | ESM, CommonJS, TypeScript, RPC e cluster passaram |
+| Documentação e licença no pacote | LLM.txt, llms.txt e LICENSE conferidos |
+| Demonstração com três brokers e queda de um | Atendimento pelos restantes passou |
+| rustfmt, Clippy e build release | Passaram |
+
+Total: **117 testes do produto + 15 do instrumento**, além dos ensaios de instalação e demonstração. O pacote permanece experimental; esses testes não são certificação de alta disponibilidade.
+
+Os 15 novos testes cobrem seleção de brokers, capacidade de execução compartilhada, SIGKILL, reconexão na mesma porta e novo registro do worker, resultado incerto sem replay, preservação de vagas de handlers antigos, seleção alternativa após rejeição explícita, prazo durante espera local, autenticação por nó, limites locais, conexões saturadas, observadores de desconexão e encerramento.
+
+O pool oferece continuidade pelos nós restantes, mas não replica RPC, filas ou WAL. Os números abaixo são históricos da v0.2 e não medem o novo pool. A publicação npm e seu teste de instalação a partir do registro são registrados separadamente em RELEASE.md.
+
+---
+
 # Validação da v0.2
 
 Executada localmente em 9 de setembro de 2026, macOS ARM64 / Apple M2.

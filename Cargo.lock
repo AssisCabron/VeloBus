@@ -73,6 +73,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "nodara"
+version = "0.3.0"
+dependencies = [
+ "bytes",
+ "crc32fast",
+ "fs2",
+ "serde_json",
+ "subtle",
+ "tokio",
+]
+
+[[package]]
 name = "pin-project-lite"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -207,18 +219,6 @@ name = "unicode-ident"
 version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
-
-[[package]]
-name = "velobus"
-version = "0.2.0"
-dependencies = [
- "bytes",
- "crc32fast",
- "fs2",
- "serde_json",
- "subtle",
- "tokio",
-]
 
 [[package]]
 name = "wasi"

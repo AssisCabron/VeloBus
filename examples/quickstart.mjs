@@ -1,9 +1,9 @@
 import { connect } from '../packages/client/dist/esm/index.js';
 
 const bus = await connect({
-  host: process.env.VELOBUS_HOST ?? '127.0.0.1',
-  port: Number(process.env.VELOBUS_PORT ?? 7447),
-  token: process.env.VELOBUS_TOKEN,
+  host: process.env.NODARA_HOST ?? '127.0.0.1',
+  port: Number(process.env.NODARA_PORT ?? 7447),
+  token: process.env.NODARA_TOKEN,
 });
 let users;
 try {

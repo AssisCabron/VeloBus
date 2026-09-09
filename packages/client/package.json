@@ -1,25 +1,62 @@
 {
-  "name": "@velobus/client",
-  "version": "0.2.0",
-  "private": true,
-  "description": "Experimental VeloBus binary protocol client for Node.js",
+  "name": "nodara",
+  "version": "0.3.0",
+  "description": "Bounded RPC for Node.js microservices with multi-broker load balancing and reconnect",
   "type": "module",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",
   "exports": {
     ".": {
-      "import": { "types": "./dist/esm/index.d.ts", "default": "./dist/esm/index.js" },
-      "require": { "types": "./dist/cjs/index.d.ts", "default": "./dist/cjs/index.js" }
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
     }
   },
-  "files": ["dist", "README.md"],
-  "engines": { "node": ">=20" },
+  "files": [
+    "dist",
+    "README.md",
+    "LLM.txt",
+    "llms.txt",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && node scripts/finalize-build.mjs",
     "test": "npm run build && node --test test/*.test.mjs",
     "prepack": "npm run build"
   },
-  "devDependencies": { "@types/node": "^22.0.0", "typescript": "~5.9.3" },
-  "license": "UNLICENSED"
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "~5.9.3"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AssisCabron/VeloBus.git",
+    "directory": "packages/client"
+  },
+  "homepage": "https://github.com/AssisCabron/VeloBus#readme",
+  "bugs": {
+    "url": "https://github.com/AssisCabron/VeloBus/issues"
+  },
+  "keywords": [
+    "rpc",
+    "microservices",
+    "load-balancing",
+    "broker",
+    "typescript",
+    "nodara"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
 }

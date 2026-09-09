@@ -1,4 +1,4 @@
-# Request/reply extension (VeloBus v0.2)
+# Request/reply extension (Nodara v0.2)
 
 Product focus: an intermediary for synchronous request/reply between backend APIs and microservices, with bounded admission and worker concurrency. The caller awaits the response; network/runtime I/O remains nonblocking. This does not mean blocking the Node.js event loop. Existing event PUBLISH/FETCH remain compatible supporting primitives, not the product's main integration path.
 
@@ -46,4 +46,4 @@ STATS adds `rpc` object: queued, running, retainedBytes, maxCalls, maxBytes, acc
 
 `await client.handle(route, async (request) => Uint8Array|string, {concurrency?:number,queueLimit?:number})` -> ServiceHandle with `close():Promise<void>` and optional `onError` callback in options. request has payload, text(), json<T>(), signal:AbortSignal, remainingMs:number. Defaults concurrency=8, queueLimit=128. handler JSON result via `handleJSON(route, async (body, context) => responseObject, options)` convenience. Dedicated child client inherits host/port/token and uses enough bounded pending requests for TAKE+COMPLETE. SDK worker concurrency is 1..32 to fit the 32-operation connection cap; each slot strictly awaits COMPLETE before its next TAKE. Don't spawn handlers above the declared concurrency. Handler error is transmitted and releases capacity. Deadline signals abort cooperatively; await actual handler settlement before COMPLETE to avoid freeing a still-running slot. The SDK must continue completing even if work became late. ServiceHandle.close stops taking new work, closes its worker connection (failing active callers), and aborts active handler signals; it must not wait indefinitely for uncooperative handlers. Parent client.close closes its child handles as well. No swallowed internal promise rejections or unbounded rejected-loop retries.
 
-The example application uses an HTTP API gateway -> VeloBus REQUEST -> replicated users.get backend workers -> response. Overload maps to HTTP 503, deadline to 504. Event tests retain their semantics and use generic service/state records.
+The example application uses an HTTP API gateway -> Nodara REQUEST -> replicated users.get backend workers -> response. Overload maps to HTTP 503, deadline to 504. Event tests retain their semantics and use generic service/state records.

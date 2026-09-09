@@ -29,7 +29,7 @@ const mode = flags.get('--mode') ?? 'memory';
 if (!['memory', 'disk'].includes(mode)) throw new Error('--mode deve ser memory ou disk');
 if (batchSize * (payloadBytes + 40) > 1048500) throw new Error('Lote excederia o frame de 1 MiB; reduza --batch ou --payload');
 const dataDir = await temporaryDirectory();
-const binary = process.env.VELOBUS_BIN ?? join(root, 'target/release/velobus');
+const binary = process.env.NODARA_BIN ?? join(root, 'target/release/nodara');
 let server; let bus; let sampler; let observedRssPeak = 0; let sampling = false;
 async function sampleRss() {
   if (!server || sampling) return;

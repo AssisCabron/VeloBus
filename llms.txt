@@ -1,0 +1,20 @@
+# Nodara
+
+> Experimental bounded RPC for Node.js microservices, with a Rust broker and a multi-broker TypeScript client. Formerly VeloBus. MIT licensed.
+
+The npm package is `nodara` (Node.js 20+, ESM/CommonJS). Brokers run separately.
+Multi-broker mode balances new calls and restores registrations after reconnect;
+it does not replicate queues or replay uncertain operations. Use durable business
+idempotency and reconciliation when handling payments or orders.
+
+## Integration
+
+- [Full agent guide](https://github.com/AssisCabron/VeloBus/blob/main/LLM.txt): API examples, defaults, capacity accounting and failure semantics.
+- [Client README](https://github.com/AssisCabron/VeloBus/blob/main/packages/client/README.md): npm installation and worker/caller examples.
+- [Multiple brokers](https://github.com/AssisCabron/VeloBus/blob/main/docs/CLUSTER.md): balancing, reconnect, shared worker concurrency and limitations.
+
+## Protocol and evidence
+
+- [RPC protocol](https://github.com/AssisCabron/VeloBus/blob/main/docs/RPC-PROTOCOL.md): binary request/reply extension and error codes.
+- [Event protocol](https://github.com/AssisCabron/VeloBus/blob/main/docs/PROTOCOL.md): node-local event history and WAL.
+- [Historical benchmarks](https://github.com/AssisCabron/VeloBus/blob/main/docs/RPC-BENCHMARKS.md): single-broker v0.2 measurements; not a cluster/Pi benchmark.

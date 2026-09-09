@@ -1,3 +1,5 @@
+> Atualização v0.3: o pool de brokers independentes, balanceamento local e reconexão foram implementados no SDK Nodara. Veja [CLUSTER.md](CLUSTER.md). Replicação e consenso continuam fora do escopo implementado; as propostas abaixo seguem como roteiro.
+
 # Roteiro técnico
 
 O foco é intermediar chamadas entre APIs e microsserviços com resposta aguardada e capacidade controlada. As etapas abaixo são propostas, não recursos disponíveis nem promessas de prazo ou desempenho. A v0.2 continua experimental, em um único nó, com RPC volátil e sem replay automático.

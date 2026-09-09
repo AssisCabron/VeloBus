@@ -1,4 +1,4 @@
-# VeloBus binary protocol v0.1
+# Nodara binary protocol v0.1
 
 This document describes the compatible event layer. The v0.2 backend request/reply extension and overload controls are specified in [RPC-PROTOCOL.md](RPC-PROTOCOL.md).
 
@@ -14,7 +14,7 @@ Length counts opcode + requestId + body, not the 4-byte prefix. Valid length: 5.
 
 ## 0x01 HELLO
 
-Must be the first request. Body: `version:u16 (=1) | token:str`. Success: `version:u16 (=1)`. Token is configured through VELOBUS_TOKEN; optional on loopback, mandatory for a non-loopback listener. Token must never be logged. A connection authenticates once; no further HELLO. Wrong credentials receive error then disconnect. SDK authenticates during connect.
+Must be the first request. Body: `version:u16 (=1) | token:str`. Success: `version:u16 (=1)`. Token is configured through NODARA_TOKEN; optional on loopback, mandatory for a non-loopback listener. Token must never be logged. A connection authenticates once; no further HELLO. Wrong credentials receive error then disconnect. SDK authenticates during connect.
 
 ## 0x02 PUBLISH
 
@@ -52,7 +52,7 @@ Body: `code:u16 | message:str`.
 
 ## Resource and storage contract
 
-Default loopback port 7447. Default disk directory `./data/velobus`; `--memory` selects explicit volatile mode. Default retained budget 64 MiB, WAL budget 128 MiB, connections 64. CLI: `--listen`, `--data-dir`, `--memory`, `--max-retained-bytes`, `--max-wal-bytes`, `--max-connections`. Refuse conflicting memory/data-dir flags. Refuse nonpositive/out-of-range budgets. Refuse concurrent processes opening the same WAL via OS file lock. Reject before capacity exhaustion; no silent eviction. A full log currently requires planned export/rotation outside the running process; automatic retention/compaction is future work.
+Default loopback port 7447. Default disk directory `./data/nodara`; `--memory` selects explicit volatile mode. Default retained budget 64 MiB, WAL budget 128 MiB, connections 64. CLI: `--listen`, `--data-dir`, `--memory`, `--max-retained-bytes`, `--max-wal-bytes`, `--max-connections`. Refuse conflicting memory/data-dir flags. Refuse nonpositive/out-of-range budgets. Refuse concurrent processes opening the same WAL via OS file lock. Reject before capacity exhaustion; no silent eviction. A full log currently requires planned export/rotation outside the running process; automatic retention/compaction is future work.
 
 WAL recovery replays bounded, validated batches, truncates only incomplete trailing records, and refuses checksum corruption or invalid record lengths. Writer failures poison the store until restart. Persist first-created file and directory metadata. Do not ACK disk mode until data is synchronized. Checkpoints belong to a particular topic/mode and the same log lifetime: deleting/replacing the WAL or restarting memory mode invalidates them. There is no generation token in v0.1, so applications must not reuse checkpoints across those actions. No replication, high availability, browser SDK, wildcard hierarchy, transactions with application databases, or production-readiness claim in v0.1.
 
@@ -60,6 +60,6 @@ Startup emits a JSON line on stdout: `{"event":"ready","address":"127.0.0.1:7447
 
 ## SDK public API
 
-Package `@velobus/client`, provisional name, Node >=20, ESM and CJS with declarations, zero runtime dependencies. `connect({host?,port?,token?,timeoutMs?,maxPendingRequests?})` returns a Client. API: `publish(topic, Uint8Array|string, {key?}?)`, `publishJSON(topic, unknown, {key?}?)`, `publishBatch([{topic,payload,key?}])`, `fetch(topic,{after?:bigint,limit?,maxBytes?,mode?:'all'|'latest'})`, `subscribe(topic,{after?,limit?,maxBytes?,mode?,pollIntervalMs?,signal?})` async iterator of events, `stats()`, `ping()`, `close()`.
+Package `nodara`, Node >=20, ESM and CJS with declarations, zero runtime dependencies. `connect({host?,port?,token?,timeoutMs?,maxPendingRequests?})` returns a Client. API: `publish(topic, Uint8Array|string, {key?}?)`, `publishJSON(topic, unknown, {key?}?)`, `publishBatch([{topic,payload,key?}])`, `fetch(topic,{after?:bigint,limit?,maxBytes?,mode?:'all'|'latest'})`, `subscribe(topic,{after?,limit?,maxBytes?,mode?,pollIntervalMs?,signal?})` async iterator of events, `stats()`, `ping()`, `close()`.
 
 Publication receipt: `{firstSequence:bigint,lastSequence:bigint,count:number,durable:boolean}`. Event: `{sequence:bigint,topic:string,key:string,payload:Buffer,json<T>():T,text():string}`. Fetch: `{cursor:bigint,events:Event[],hasMore:boolean}`. SDK rejects on socket close/timeouts and uses socket backpressure with bounded pending requests. Timed out requests must close the connection so outcomes aren't silently confused. Subscribe buffers at most one fetch batch; it must not busy-spin on empty batches. No reconnect/retry that can duplicate publications invisibly. `subscribe` is convenience, explicit `fetch` is recommended for durable application checkpointing.

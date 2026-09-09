@@ -1,3 +1,5 @@
+> Registro histórico anterior à renomeação para Nodara. Binários, variáveis e resultados abaixo pertencem à versão indicada. Na árvore atual, use `nodara` e o prefixo `NODARA_`; não atribua estas medições ao pool v0.3.
+
 # Benchmark de request/reply
 
 O benchmark mede chamadas completas **cliente Node → broker Rust → worker Node → broker → cliente**, verificando os bytes de cada resposta. A capacidade observada pertence a esse conjunto e à carga descrita; não é um número isolado do núcleo Rust.

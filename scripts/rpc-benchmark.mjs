@@ -214,7 +214,7 @@ async function main() {
   if (!Number.isFinite(durationMs) || durationMs < 100 || durationMs > 300000 || !Number.isFinite(warmupMs) || warmupMs < 0 || warmupMs > 60000 || !Number.isInteger(repetitions) || repetitions < 1 || repetitions > 10) throw new Error('Invalid duration/warmup/repetitions');
   const selectedNames = flags.has('--scenarios') ? flags.get('--scenarios').split(',') : smoke ? ['echo-c1', 'slow-overload'] : scenarios.map(scenario => scenario.name);
   const selected = selectedNames.map(name => { const scenario = scenarios.find(item => item.name === name); if (!scenario) throw new Error(`Unknown scenario: ${name}`); return scenario; });
-  const binary = process.env.VELOBUS_BIN ?? join(root, 'target/release/velobus');
+  const binary = process.env.NODARA_BIN ?? join(root, 'target/release/nodara');
   const report = {
     schemaVersion: 1, timestamp: new Date().toISOString(), purpose: smoke ? 'functional benchmark smoke check' : 'local RPC baseline; not a capacity certification',
     environment: {
@@ -222,7 +222,7 @@ async function main() {
       systemMemoryBytes: totalmem(), node: process.version, rust: (await exec('rustc', ['--version'])).stdout.trim(),
       sourceCommit: (await exec('git', ['rev-parse', 'HEAD'], { cwd: root })).stdout.trim(),
       workingTreeDirty: Boolean((await exec('git', ['status', '--porcelain'], { cwd: root })).stdout.trim()),
-      binaryLabel: process.env.VELOBUS_BIN ? 'VELOBUS_BIN override' : 'target/release/velobus',
+      binaryLabel: process.env.NODARA_BIN ? 'NODARA_BIN override' : 'target/release/nodara',
       binaryBytes: (await stat(binary)).size, binarySha256: createHash('sha256').update(await readFile(binary)).digest('hex'),
     },
     methodology: {

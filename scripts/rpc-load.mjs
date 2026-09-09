@@ -40,7 +40,7 @@ try {
     timestamp: new Date().toISOString(),
     purpose: 'Short local verification of RPC overload protection, not a throughput benchmark',
     environment: { cpu: cpus()[0]?.model, os: platform(), architecture: arch(), node: process.version },
-    workload: { requests: 64, callers: 2, replicas: 2, concurrencyPerReplica: 2, queueLimit: 8, handlerDelayMs: 50, deadlineMs: 2000, transport: 'loopback TCP', binary: process.env.VELOBUS_BIN ? 'explicit binary from VELOBUS_BIN' : 'target/debug/velobus' },
+    workload: { requests: 64, callers: 2, replicas: 2, concurrencyPerReplica: 2, queueLimit: 8, handlerDelayMs: 50, deadlineMs: 2000, transport: 'loopback TCP', binary: process.env.NODARA_BIN ? 'explicit binary from NODARA_BIN' : 'target/debug/nodara' },
     results: { succeeded: success.length, overloaded: overloaded.length, unexpectedErrors: unexpected.length, observedPeakHandlers: peak, executed, elapsedMs: performance.now() - start },
     rpc,
     notes: ['Waiting calls are bounded; overload returns a structured error instead of forwarding to every service.', 'Exact admitted count depends on scheduling.', 'Caller and worker code run on the same Mac, not on a Raspberry Pi.', 'This test does not prove high availability or sustained capacity.'],

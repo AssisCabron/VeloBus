@@ -1,6 +1,6 @@
 {
-  "name": "velobus-development",
-  "version": "0.2.0",
+  "name": "nodara-development",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "dev": "cargo run -- --memory",
     "start": "cargo run --release --",
     "test": "cargo build && cargo test && npm --prefix packages/client test && npm run test:integration",
-    "test:integration": "node --test --test-concurrency=1 scripts/integration.test.mjs scripts/rpc-integration.test.mjs scripts/http-integration.test.mjs",
+    "test:integration": "node --test --test-concurrency=1 scripts/integration.test.mjs scripts/rpc-integration.test.mjs scripts/http-integration.test.mjs scripts/cluster-integration.test.mjs",
     "example": "node examples/quickstart.mjs",
     "example:http": "node examples/http-demo.mjs",
     "benchmark": "node scripts/benchmark.mjs",
@@ -17,7 +17,10 @@
     "test:benchmark": "node --test scripts/benchmarks/*.test.mjs && node scripts/rpc-benchmark.mjs --smoke",
     "load:rpc": "node scripts/rpc-load.mjs",
     "pack:client": "node scripts/pack-client.mjs",
-    "test:package": "node scripts/package-smoke.mjs"
+    "test:package": "node scripts/package-smoke.mjs",
+    "example:cluster": "node examples/cluster-demo.mjs"
   },
-  "engines": {"node": ">=20"}
+  "engines": {
+    "node": ">=20"
+  }
 }

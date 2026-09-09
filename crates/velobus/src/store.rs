@@ -257,7 +257,7 @@ mod tests {
     impl Temp {
         fn new() -> Self {
             let path = std::env::temp_dir().join(format!(
-                "velobus-test-{}-{}-{}",
+                "nodara-test-{}-{}-{}",
                 std::process::id(),
                 std::time::SystemTime::now()
                     .duration_since(std::time::UNIX_EPOCH)

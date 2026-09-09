@@ -1,3 +1,7 @@
+# Arquitetura atual: Nodara v0.3
+
+O [pool de múltiplos brokers](CLUSTER.md) adiciona balanceamento e reconexão no SDK. Cada broker mantém a arquitetura independente descrita abaixo; não há replicação de RPC ou WAL. Os detalhes a seguir documentam a base v0.2, anteriormente chamada VeloBus.
+
 # Arquitetura
 
 VeloBus v0.2 é um intermediário experimental de **request/reply entre APIs e microsserviços**, em um único nó. O núcleo Rust controla admissão, filas e atribuição de chamadas. O cliente TypeScript é um pacote Node.js comum, com ESM, CommonJS e tipos, sem addon nativo. O servidor é um processo separado.
